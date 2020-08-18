@@ -4,6 +4,7 @@ import "./MyERC20.sol";
 
 interface MyERC20Like {
     function mint(address beneficiary, uint256 amount) external;
+
     function burn(address beneficiary, uint256 amount) external;
 }
 
@@ -37,31 +38,35 @@ contract HmyManager {
     }
 
     /**
-    * @dev constructor
-    * @param oneToken token contract address on harmony chain, e.g., hrc20
-    */
+     * @dev constructor
+     * @param oneToken token contract address on harmony chain, e.g., hrc20
+     */
     constructor(address oneToken) public {
         wards[msg.sender] = 1;
         oneToken_ = MyERC20Like(oneToken);
     }
 
     /**
-    * @dev burns tokens on harmony to be unlocked on ethereum
-    * @param amount amount of tokens to burn
-    * @param recipient recipient of the unlock tokens on ethereum
-    */
+     * @dev burns tokens on harmony to be unlocked on ethereum
+     * @param amount amount of tokens to burn
+     * @param recipient recipient of the unlock tokens on ethereum
+     */
     function burnToken(uint256 amount, address recipient) public {
         oneToken_.burn(msg.sender, amount);
         emit Burned(address(oneToken_), msg.sender, amount, recipient);
     }
 
     /**
-    * @dev mints tokens corresponding to the tokens locked in the ethereum chain
-    * @param amount amount of tokens for minting
-    * @param recipient recipient of the minted tokens (harmony address)
-    * @param receiptId transaction hash of the lock event on ethereum chain
-    */
-    function mintToken(uint256 amount, address recipient, bytes32 receiptId) public auth {
+     * @dev mints tokens corresponding to the tokens locked in the ethereum chain
+     * @param amount amount of tokens for minting
+     * @param recipient recipient of the minted tokens (harmony address)
+     * @param receiptId transaction hash of the lock event on ethereum chain
+     */
+    function mintToken(
+        uint256 amount,
+        address recipient,
+        bytes32 receiptId
+    ) public auth {
         require(!usedEvents_[receiptId], "The unlock event cannot be reused");
         usedEvents_[receiptId] = true;
         oneToken_.mint(recipient, amount);

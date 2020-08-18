@@ -87,7 +87,7 @@ async function unlockToken(managerAddr, userAddr, amount, receiptId) {
   await managerContract.methods.unlockToken(amount, userAddr, receiptId).send({
     from: ethMasterAccount,
     gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
+    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
   });
 }
 

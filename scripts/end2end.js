@@ -2,7 +2,7 @@ require("dotenv").config();
 const Web3 = require("web3");
 const { deployERC20, deployEthManager } = require("./deploy_eth");
 const { deployHRC20, deployHmyManager } = require("./deploy_hmy");
-// const confirmEtherTransaction = require("./confirm_eth");
+const {sleep, BLOCK_TO_FINALITY, AVG_BLOCK_TIME} = require("./utils");
 const {
   mintERC20,
   checkEthBalance,
@@ -20,7 +20,7 @@ const {
 const web3 = new Web3(process.env.ETH_NODE_URL);
 
 (async function () {
-  const userAddr = "0x84a81991ceC1Aa5f0770D7a5639E632e513298C4";
+  const userAddr = process.env.ETH_USER;
   const amount = 100;
 
   // deploy eth contracts
@@ -62,7 +62,19 @@ const web3 = new Web3(process.env.ETH_NODE_URL);
 
   // wait sufficient to confirm the transaction went through
   const lockedEvent = await lockToken(ethManager, process.env.USER, amount);
-  // confirmEtherTransaction(lockedEvent.transactionHash); TODO: commented for localnet testing
+  
+  const expectedBlockNumber = lockedEvent.blockNumber + BLOCK_TO_FINALITY;
+  while (true) {
+    let blockNumber = await web3.eth.getBlockNumber();
+    if (blockNumber <= expectedBlockNumber) {
+      console.log(
+        `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
+      );
+      await sleep(AVG_BLOCK_TIME);
+    } else {
+      break;
+    }
+  }
 
   console.log(
     "Eth balance of " +

@@ -11,7 +11,7 @@ hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
 
 async function mintHRC20(contractAddr, accountAddr, amount) {
-  const erc20ContractJson = require("../build/contracts/MyERC20.json");
+  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
   let erc20Contract = hmy.contracts.createContract(
     erc20ContractJson.abi,
     contractAddr
@@ -21,7 +21,7 @@ async function mintHRC20(contractAddr, accountAddr, amount) {
 }
 
 async function checkHmyBalance(contract, addr) {
-  const erc20ContractJson = require("../build/contracts/MyERC20.json");
+  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
   let erc20Contract = hmy.contracts.createContract(
     erc20ContractJson.abi,
     contract
@@ -32,7 +32,7 @@ async function checkHmyBalance(contract, addr) {
 }
 
 async function approveHmyManger(contract, addr) {
-  const erc20ContractJson = require("../build/contracts/MyERC20.json");
+  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
   let erc20Contract = hmy.contracts.createContract(
     erc20ContractJson.abi,
     contract
@@ -42,7 +42,7 @@ async function approveHmyManger(contract, addr) {
 }
 
 async function mintToken(managerAddr, userAddr, amount, receiptId) {
-  const hmyManagerJson = require("../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
     managerAddr
@@ -57,7 +57,7 @@ async function mintToken(managerAddr, userAddr, amount, receiptId) {
 }
 
 async function burnToken(managerAddr, userAddr, amount) {
-  const hmyManagerJson = require("../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
     managerAddr

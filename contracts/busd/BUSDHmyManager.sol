@@ -1,15 +1,8 @@
 pragma solidity ^0.5.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./MyERC20.sol";
+import "./IBUSD.sol";
 
-interface MyERC20Like {
-    function mint(address beneficiary, uint256 amount) external;
-
-    function burn(address beneficiary, uint256 amount) external;
-}
-
-contract HmyManager {
-    MyERC20Like public oneToken_;
+contract BUSDHmyManager {
+    IBUSD public busd_;
 
     mapping(bytes32 => bool) public usedEvents_;
 
@@ -39,11 +32,11 @@ contract HmyManager {
 
     /**
      * @dev constructor
-     * @param oneToken token contract address on harmony chain, e.g., hrc20
+     * @param busd token contract address on harmony chain, e.g., hrc20
      */
-    constructor(address oneToken) public {
+    constructor(IBUSD busd) public {
         wards[msg.sender] = 1;
-        oneToken_ = MyERC20Like(oneToken);
+        busd_ = busd;
     }
 
     /**
@@ -52,8 +45,12 @@ contract HmyManager {
      * @param recipient recipient of the unlock tokens on ethereum
      */
     function burnToken(uint256 amount, address recipient) public {
-        oneToken_.burn(msg.sender, amount);
-        emit Burned(address(oneToken_), msg.sender, amount, recipient);
+        require(
+            busd_.transferFrom(msg.sender, address(this), amount),
+            "HmyManager/could not transfer tokens from user"
+        );
+        require(busd_.decreaseSupply(amount), "HmyManager/burn failed");
+        emit Burned(address(busd_), msg.sender, amount, recipient);
     }
 
     /**
@@ -72,7 +69,11 @@ contract HmyManager {
             "HmyManager/The unlock event cannot be reused"
         );
         usedEvents_[receiptId] = true;
-        oneToken_.mint(recipient, amount);
+        require(busd_.increaseSupply(amount), "HmyManager/mint failed");
+        require(
+            busd_.transfer(recipient, amount),
+            "HmyManager/transfer after mint failed"
+        );
         emit Minted(amount, recipient);
     }
 }

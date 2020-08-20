@@ -11,7 +11,7 @@ async function deployERC20() {
   web3.eth.defaultAccount = ethMasterAccount.address;
   ethMasterAccount = ethMasterAccount.address;
 
-  const MyERC20Json = require("../build/contracts/MyERC20.json");
+  const MyERC20Json = require("../../build/contracts/MyERC20.json");
   const tokenContract = new web3.eth.Contract(MyERC20Json.abi);
   const txContract = await tokenContract
     .deploy({
@@ -36,7 +36,7 @@ async function deployEthManager(erc20Addr) {
   web3.eth.defaultAccount = ethMasterAccount.address;
   ethMasterAccount = ethMasterAccount.address;
 
-  const EthManagerJson = require("../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/EthManager.json");
   const managerContract = new web3.eth.Contract(EthManagerJson.abi);
   const txContract = await managerContract
     .deploy({
@@ -54,6 +54,6 @@ async function deployEthManager(erc20Addr) {
 }
 
 module.exports = {
-    deployERC20,
-    deployEthManager
+  deployERC20,
+  deployEthManager,
 };

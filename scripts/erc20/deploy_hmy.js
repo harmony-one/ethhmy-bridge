@@ -9,7 +9,7 @@ hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
 
 async function deployHRC20() {
-  const erc20ContractJson = require("../build/contracts/MyERC20.json");
+  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
   let erc20Contract = hmy.contracts.createContract(erc20ContractJson.abi);
   erc20Contract.wallet.setSigner(process.env.ADMIN);
   let deployOptions = { data: erc20ContractJson.bytecode };
@@ -25,7 +25,7 @@ async function deployHRC20() {
 }
 
 async function deployHmyManager(erc20Addr) {
-  const hmyManagerJson = require("../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
   hmyManagerContract.wallet.setSigner(process.env.ADMIN);
   let deployOptions = { data: hmyManagerJson.bytecode, arguments: [erc20Addr] };
@@ -44,6 +44,6 @@ async function deployHmyManager(erc20Addr) {
 }
 
 module.exports = {
-    deployHRC20,
-    deployHmyManager
+  deployHRC20,
+  deployHmyManager,
 };

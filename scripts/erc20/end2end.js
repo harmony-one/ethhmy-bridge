@@ -2,7 +2,7 @@ require("dotenv").config();
 const Web3 = require("web3");
 const { deployERC20, deployEthManager } = require("./deploy_eth");
 const { deployHRC20, deployHmyManager } = require("./deploy_hmy");
-const {sleep, BLOCK_TO_FINALITY, AVG_BLOCK_TIME} = require("./utils");
+const {sleep, BLOCK_TO_FINALITY, AVG_BLOCK_TIME} = require("../utils");
 const {
   mintERC20,
   checkEthBalance,
@@ -63,18 +63,18 @@ const web3 = new Web3(process.env.ETH_NODE_URL);
   // wait sufficient to confirm the transaction went through
   const lockedEvent = await lockToken(ethManager, process.env.USER, amount);
   
-  const expectedBlockNumber = lockedEvent.blockNumber + BLOCK_TO_FINALITY;
-  while (true) {
-    let blockNumber = await web3.eth.getBlockNumber();
-    if (blockNumber <= expectedBlockNumber) {
-      console.log(
-        `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
-      );
-      await sleep(AVG_BLOCK_TIME);
-    } else {
-      break;
-    }
-  }
+  // const expectedBlockNumber = lockedEvent.blockNumber + BLOCK_TO_FINALITY;
+  // while (true) {
+  //   let blockNumber = await web3.eth.getBlockNumber();
+  //   if (blockNumber <= expectedBlockNumber) {
+  //     console.log(
+  //       `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
+  //     );
+  //     await sleep(AVG_BLOCK_TIME);
+  //   } else {
+  //     break;
+  //   }
+  // }
 
   console.log(
     "Eth balance of " +

@@ -1,10 +1,8 @@
 pragma solidity ^0.5.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "./IBUSD.sol";
 
-contract EthManager {
-    using SafeERC20 for IERC20;
-    IERC20 public ethToken_;
+contract BUSDEthManager {
+    IBUSD public busd_;
 
     mapping(bytes32 => bool) public usedEvents_;
 
@@ -34,11 +32,11 @@ contract EthManager {
 
     /**
      * @dev constructor
-     * @param ethToken token contract address, e.g., erc20 contract
+     * @param busd token contract address, e.g., erc20 contract
      */
-    constructor(IERC20 ethToken) public {
+    constructor(IBUSD busd) public {
         wards[msg.sender] = 1;
-        ethToken_ = ethToken;
+        busd_ = busd;
     }
 
     /**
@@ -47,8 +45,11 @@ contract EthManager {
      * @param recipient recipient address on the harmony chain
      */
     function lockToken(uint256 amount, address recipient) public {
-        ethToken_.safeTransferFrom(msg.sender, address(this), amount);
-        emit Locked(address(ethToken_), msg.sender, amount, recipient);
+        require(
+            busd_.transferFrom(msg.sender, address(this), amount),
+            "EthManager/lock failed"
+        );
+        emit Locked(address(busd_), msg.sender, amount, recipient);
     }
 
     /**
@@ -67,7 +68,7 @@ contract EthManager {
             "EthManager/The burn event cannot be reused"
         );
         usedEvents_[receiptId] = true;
-        ethToken_.safeTransfer(recipient, amount);
+        require(busd_.transfer(recipient, amount), "EthManager/unlock failed");
         emit Unlocked(amount, recipient);
     }
 }

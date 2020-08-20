@@ -12,7 +12,7 @@ async function mintERC20(contractAddr, accountAddr, amount) {
   web3.eth.defaultAccount = ethMasterAccount.address;
   ethMasterAccount = ethMasterAccount.address;
 
-  const MyERC20Json = require("../build/contracts/MyERC20.json");
+  const MyERC20Json = require("../../build/contracts/MyERC20.json");
   const erc20Contract = new web3.eth.Contract(MyERC20Json.abi, contractAddr);
   await erc20Contract.methods.mint(accountAddr, amount).send({
     from: ethMasterAccount,
@@ -23,7 +23,7 @@ async function mintERC20(contractAddr, accountAddr, amount) {
 
 async function checkEthBalance(contract, addr) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
-  const MyERC20Json = require("../build/contracts/MyERC20.json");
+  const MyERC20Json = require("../../build/contracts/MyERC20.json");
   const erc20Contract = new web3.eth.Contract(MyERC20Json.abi, contract);
   return await erc20Contract.methods.balanceOf(addr).call();
 }
@@ -37,7 +37,7 @@ async function approveEthManger(contractAddr, managerAddr, amount) {
   web3.eth.defaultAccount = ethUserAccount.address;
   ethUserAccount = ethUserAccount.address;
 
-  const MyERC20Json = require("../build/contracts/MyERC20.json");
+  const MyERC20Json = require("../../build/contracts/MyERC20.json");
   const erc20Contract = new web3.eth.Contract(MyERC20Json.abi, contractAddr);
   await erc20Contract.methods.approve(managerAddr, amount).send({
     from: ethUserAccount,
@@ -55,7 +55,7 @@ async function lockToken(managerAddr, userAddr, amount) {
   web3.eth.defaultAccount = ethUserAccount.address;
   ethUserAccount = ethUserAccount.address;
 
-  const EthManagerJson = require("../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/EthManager.json");
   const managerContract = new web3.eth.Contract(
     EthManagerJson.abi,
     managerAddr
@@ -78,7 +78,7 @@ async function unlockToken(managerAddr, userAddr, amount, receiptId) {
   web3.eth.defaultAccount = ethMasterAccount.address;
   ethMasterAccount = ethMasterAccount.address;
 
-  const EthManagerJson = require("../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/EthManager.json");
   const managerContract = new web3.eth.Contract(
     EthManagerJson.abi,
     managerAddr

@@ -46,3 +46,28 @@ GAS_PRICE=1000000000
 ```
 node scripts/erc20/end2end.js
 ```
+
+Sample output would look like:
+
+```
+Deployed ERC20 contract to 0x10d37ebAecAc162102a12f38b4162a79b70DF6E1
+Deployed EthManager contract to 0x93156FF413BD13433C9f84d610B9C317D939Fe0B
+HRC20 contract deployed at 0x07e895ee204be18dfa968243113293d57595265f
+HmyManager contract deployed at 0x794d9f1227f2632a130b779c477c4de0c30c2ea3
+Eth balance of 0x070dA0Ff07Cb324Ac7f208dC8f72Ed0024e849e3: 0
+Hmy balance of 0x0B585F8DaEfBC68a311FbD4cB20d9174aD174016 before eth2hmy: 0
+Eth balance of 0x070dA0Ff07Cb324Ac7f208dC8f72Ed0024e849e3 after minting: 100
+Currently at block 8533537, waiting for block 8533550 to be confirmed
+Currently at block 8533537, waiting for block 8533550 to be confirmed
+Currently at block 8533538, waiting for block 8533550 to be confirmed
+Currently at block 8533539, waiting for block 8533550 to be confirmed
+Currently at block 8533541, waiting for block 8533550 to be confirmed
+Currently at block 8533546, waiting for block 8533550 to be confirmed
+Currently at block 8533550, waiting for block 8533550 to be confirmed
+Eth balance of 0x070dA0Ff07Cb324Ac7f208dC8f72Ed0024e849e3 after locking: 0
+Hmy balance of 0x0B585F8DaEfBC68a311FbD4cB20d9174aD174016 after eth2hmy: 100
+Hmy balance of 0x0B585F8DaEfBC68a311FbD4cB20d9174aD174016 before hmy2eth: 100
+Eth balance of 0x070dA0Ff07Cb324Ac7f208dC8f72Ed0024e849e3: 0
+Hmy balance of 0x0B585F8DaEfBC68a311FbD4cB20d9174aD174016 after burning: 0
+Eth balance of 0x070dA0Ff07Cb324Ac7f208dC8f72Ed0024e849e3 after unlocking: 100
+```

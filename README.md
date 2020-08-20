@@ -44,5 +44,5 @@ GAS_PRICE=1000000000
 ## Running end to end demo using ethereum ropsten and harmony testnets
 
 ```
-node scripts/end2end.js
+node scripts/erc20/end2end.js
 ```

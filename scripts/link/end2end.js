@@ -66,18 +66,18 @@ const web3 = new Web3(process.env.ETH_NODE_URL);
   // wait sufficient to confirm the transaction went through
   const lockedEvent = await lockToken(ethManager, process.env.USER, amount);
 
-  // const expectedBlockNumber = lockedEvent.blockNumber + BLOCK_TO_FINALITY;
-  // while (true) {
-  //   let blockNumber = await web3.eth.getBlockNumber();
-  //   if (blockNumber <= expectedBlockNumber) {
-  //     console.log(
-  //       `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
-  //     );
-  //     await sleep(AVG_BLOCK_TIME);
-  //   } else {
-  //     break;
-  //   }
-  // }
+  const expectedBlockNumber = lockedEvent.blockNumber + BLOCK_TO_FINALITY;
+  while (true) {
+    let blockNumber = await web3.eth.getBlockNumber();
+    if (blockNumber <= expectedBlockNumber) {
+      console.log(
+        `Currently at block ${blockNumber}, waiting for block ${expectedBlockNumber} to be confirmed`
+      );
+      await sleep(AVG_BLOCK_TIME);
+    } else {
+      break;
+    }
+  }
 
   console.log(
     "Eth balance of " +

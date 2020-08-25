@@ -63,11 +63,12 @@ async function approveEthManger(contractAddr, managerAddr, amount) {
 
   const busdJson = require("../../out/BUSDImplementation.json");
   const busdContract = new web3.eth.Contract(busdJson.abi, contractAddr);
-  await busdContract.methods.approve(managerAddr, amount).send({
+  let transaction = await busdContract.methods.approve(managerAddr, amount).send({
     from: ethUserAccount,
     gas: process.env.ETH_GAS_LIMIT,
     gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
   });
+  return transaction.events.Approval;
 }
 
 async function lockToken(managerAddr, userAddr, amount) {

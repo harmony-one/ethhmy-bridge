@@ -1,7 +1,11 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.17;
+
 import "./IBUSD.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract BUSDEthManager {
+    using SafeMath for uint256;
+
     IBUSD public busd_;
 
     mapping(bytes32 => bool) public usedEvents_;
@@ -22,6 +26,7 @@ contract BUSDEthManager {
     }
 
     function deny(address guy) external auth {
+        require(guy != owner, "EthManager/cannot deny the owner");
         wards[guy] = 0;
     }
 
@@ -30,11 +35,14 @@ contract BUSDEthManager {
         _;
     }
 
+    address public owner;
+
     /**
      * @dev constructor
      * @param busd token contract address, e.g., erc20 contract
      */
     constructor(IBUSD busd) public {
+        owner = msg.sender;
         wards[msg.sender] = 1;
         busd_ = busd;
     }
@@ -46,10 +54,18 @@ contract BUSDEthManager {
      */
     function lockToken(uint256 amount, address recipient) public {
         require(
+            recipient != address(0),
+            "EthManager/recipient is a zero address"
+        );
+        require(amount > 0, "EthManager/zero token locked");
+        uint256 _balanceBefore = busd_.balanceOf(msg.sender);
+        require(
             busd_.transferFrom(msg.sender, address(this), amount),
             "EthManager/lock failed"
         );
-        emit Locked(address(busd_), msg.sender, amount, recipient);
+        uint256 _balanceAfter = busd_.balanceOf(msg.sender);
+        uint256 _actualAmount = _balanceBefore.sub(_balanceAfter);
+        emit Locked(address(busd_), msg.sender, _actualAmount, recipient);
     }
 
     /**

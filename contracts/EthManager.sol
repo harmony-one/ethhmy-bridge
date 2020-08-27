@@ -1,8 +1,10 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.17;
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 contract EthManager {
+    using SafeMath for uint256;
     using SafeERC20 for IERC20;
     IERC20 public ethToken_;
 
@@ -24,6 +26,7 @@ contract EthManager {
     }
 
     function deny(address guy) external auth {
+        require(guy != owner, "EthManager/cannot deny the owner");
         wards[guy] = 0;
     }
 
@@ -32,11 +35,14 @@ contract EthManager {
         _;
     }
 
+    address public owner;
+
     /**
      * @dev constructor
      * @param ethToken token contract address, e.g., erc20 contract
      */
     constructor(IERC20 ethToken) public {
+        owner = msg.sender;
         wards[msg.sender] = 1;
         ethToken_ = ethToken;
     }
@@ -47,8 +53,16 @@ contract EthManager {
      * @param recipient recipient address on the harmony chain
      */
     function lockToken(uint256 amount, address recipient) public {
+        require(
+            recipient != address(0),
+            "EthManager/recipient is a zero address"
+        );
+        require(amount > 0, "EthManager/zero token locked");
+        uint256 _balanceBefore = ethToken_.balanceOf(msg.sender);
         ethToken_.safeTransferFrom(msg.sender, address(this), amount);
-        emit Locked(address(ethToken_), msg.sender, amount, recipient);
+        uint256 _balanceAfter = ethToken_.balanceOf(msg.sender);
+        uint256 _actualAmount = _balanceBefore.sub(_balanceAfter);
+        emit Locked(address(ethToken_), msg.sender, _actualAmount, recipient);
     }
 
     /**

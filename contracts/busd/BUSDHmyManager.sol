@@ -1,4 +1,5 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.17;
+
 import "./IBUSD.sol";
 
 contract BUSDHmyManager {
@@ -22,6 +23,7 @@ contract BUSDHmyManager {
     }
 
     function deny(address guy) external auth {
+        require(guy != owner, "HmyManager/cannot deny the owner");
         wards[guy] = 0;
     }
 
@@ -30,11 +32,14 @@ contract BUSDHmyManager {
         _;
     }
 
+    address public owner;
+
     /**
      * @dev constructor
      * @param busd token contract address on harmony chain, e.g., hrc20
      */
     constructor(IBUSD busd) public {
+        owner = msg.sender;
         wards[msg.sender] = 1;
         busd_ = busd;
     }
@@ -66,7 +71,7 @@ contract BUSDHmyManager {
     ) public auth {
         require(
             !usedEvents_[receiptId],
-            "HmyManager/The unlock event cannot be reused"
+            "HmyManager/The lock event cannot be reused"
         );
         usedEvents_[receiptId] = true;
         require(busd_.increaseSupply(amount), "HmyManager/mint failed");

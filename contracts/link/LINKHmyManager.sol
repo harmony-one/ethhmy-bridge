@@ -1,4 +1,5 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.17;
+
 import "./ILINK.sol";
 
 contract LINKHmyManager {
@@ -22,6 +23,7 @@ contract LINKHmyManager {
     }
 
     function deny(address guy) external auth {
+        require(guy != owner, "HmyManager/cannot deny the owner");
         wards[guy] = 0;
     }
 
@@ -30,11 +32,14 @@ contract LINKHmyManager {
         _;
     }
 
+    address public owner;
+
     /**
      * @dev constructor
      * @param link token contract address on harmony chain, e.g., hrc20
      */
     constructor(ILINK link) public {
+        owner = msg.sender;
         wards[msg.sender] = 1;
         link_ = link;
     }

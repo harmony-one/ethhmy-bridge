@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.17;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./MyERC20.sol";
 
@@ -29,6 +29,7 @@ contract HmyManager {
     }
 
     function deny(address guy) external auth {
+        require(guy != owner, "HmyManager/cannot deny the owner");
         wards[guy] = 0;
     }
 
@@ -37,11 +38,14 @@ contract HmyManager {
         _;
     }
 
+    address public owner;
+
     /**
      * @dev constructor
      * @param oneToken token contract address on harmony chain, e.g., hrc20
      */
     constructor(address oneToken) public {
+        owner = msg.sender;
         wards[msg.sender] = 1;
         oneToken_ = MyERC20Like(oneToken);
     }

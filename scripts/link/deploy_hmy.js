@@ -25,7 +25,10 @@ async function deployHmyLINK() {
 async function deployLINKHmyManager(linkAddr) {
   const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
-  let deployOptions = { data: hmyManagerJson.bytecode, arguments: [linkAddr] };
+  let deployOptions = {
+    data: hmyManagerJson.bytecode,
+    arguments: [linkAddr],
+  };
 
   let options = {
     gasPrice: 1000000000,

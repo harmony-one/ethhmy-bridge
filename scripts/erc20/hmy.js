@@ -11,7 +11,7 @@ hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
 
 async function mintHRC20(contractAddr, accountAddr, amount) {
-  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
+  const erc20ContractJson = require("../../build/contracts/BridgedToken.json");
   let erc20Contract = hmy.contracts.createContract(
     erc20ContractJson.abi,
     contractAddr
@@ -21,7 +21,7 @@ async function mintHRC20(contractAddr, accountAddr, amount) {
 }
 
 async function checkHmyBalance(contract, addr) {
-  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
+  const erc20ContractJson = require("../../build/contracts/BridgedToken.json");
   let erc20Contract = hmy.contracts.createContract(
     erc20ContractJson.abi,
     contract
@@ -31,17 +31,69 @@ async function checkHmyBalance(contract, addr) {
   return res;
 }
 
-async function approveHmyManger(contract, addr) {
-  const erc20ContractJson = require("../../build/contracts/MyERC20.json");
+async function getMappingFor(managerAddr, erc20TokenAddr) {
+  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  let hmyManagerContract = hmy.contracts.createContract(
+    hmyManagerJson.abi,
+    managerAddr
+  );
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+  let res = await hmyManagerContract.methods.mappings(erc20TokenAddr).call(options);
+  return res;
+}
+
+async function approveHmyManger(contract, spender, amount) {
+  const erc20ContractJson = require("../../build/contracts/BridgedToken.json");
   let erc20Contract = hmy.contracts.createContract(
     erc20ContractJson.abi,
     contract
   );
+  erc20Contract.wallet.setSigner(process.env.USER);
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
-  await erc20Contract.methods.rely(addr).send(options);
+  await erc20Contract.methods.approve(spender, amount).send(options);
 }
 
-async function mintToken(managerAddr, userAddr, amount, receiptId) {
+async function changeERC20HmyManagerThreshold(managerAddr, threshold) {
+  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  let hmyManagerContract = hmy.contracts.createContract(
+    hmyManagerJson.abi,
+    managerAddr
+  );
+  hmyManagerContract.wallet.setSigner(process.env.ADMIN);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  let res = await hmyManagerContract.methods.changeThreshold(threshold).send(options);
+  if (res.status == 'rejected') {
+    throw "transaction failed!!!";
+  }
+}
+
+async function authorizeERC20Hmy(managerAddr, userAddr) {
+  const contractJson = require("../../build/contracts/HmyManager.json");
+  let contract = hmy.contracts.createContract(contractJson.abi, managerAddr);
+  contract.wallet.setSigner(process.env.ADMIN);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+  let res = await contract.methods.rely(userAddr).send(options);
+  if (res.status == 'rejected') {
+    throw "transaction failed!!!";
+  }
+}
+
+async function addToken(managerAddr, tokenManagerAddr, erc20TokenAddr, name, symbol, decimals) {
+  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  let hmyManagerContract = hmy.contracts.createContract(
+    hmyManagerJson.abi,
+    managerAddr
+  );
+  hmyManagerContract.wallet.setSigner(process.env.USER);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  await hmyManagerContract.methods
+    .addToken(tokenManagerAddr, erc20TokenAddr, name, symbol, decimals)
+    .send(options);
+}
+
+async function mintToken(managerAddr, oneTokenAddr, userAddr, amount, receiptId) {
   const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
@@ -52,11 +104,11 @@ async function mintToken(managerAddr, userAddr, amount, receiptId) {
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   await hmyManagerContract.methods
-    .mintToken(amount, userAddr, receiptId)
+    .mintToken(oneTokenAddr, amount, userAddr, receiptId)
     .send(options);
 }
 
-async function burnToken(managerAddr, userAddr, amount) {
+async function burnToken(managerAddr, oneTokenAddr, userAddr, amount) {
   const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
@@ -67,7 +119,7 @@ async function burnToken(managerAddr, userAddr, amount) {
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   let response = await hmyManagerContract.methods
-    .burnToken(amount, userAddr)
+    .burnToken(oneTokenAddr, amount, userAddr)
     .send(options);
   return response.transaction.id;
 }
@@ -75,7 +127,11 @@ async function burnToken(managerAddr, userAddr, amount) {
 module.exports = {
   mintHRC20,
   checkHmyBalance,
+  getMappingFor,
   approveHmyManger,
+  changeERC20HmyManagerThreshold,
+  authorizeERC20Hmy,
+  addToken,
   mintToken,
   burnToken,
 };

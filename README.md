@@ -11,9 +11,9 @@ Ethereum&lt;>Harmony two way bridge (trusted version)
 
 | Milestone | Components                                          | Trust Requirement | Centralization | Target Date    |
 |-----------|-----------------------------------------------------|-------------------|----------------|----------------|
-| v1        | Smart contracts w/ permissioned mint/unlock         | Trusted           | Centralized    | DONE           |
-| v2        | Smart contracts w/ single relayer hosted by harmony | Semi-trusted      | Centralized    | Sept 1, 2020   |
-| v3        | Smart contracts w/ a network of relayers            | Trustless         | Decentralized  | Sept 15, 2020  |
+| v1        | Smart contracts w/ permissioned mint/unlock         | Trusted           | Centralized    | 25 Sept 2020   |
+| v2        | Smart contracts w/ single relayer hosted by harmony | Semi-trusted      | Centralized    | TBD            |
+| v3        | Smart contracts w/ a network of relayers            | Trustless         | Decentralized  | TBD            |
 
 ## Setup
 

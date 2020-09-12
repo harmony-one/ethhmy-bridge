@@ -44,6 +44,46 @@ async function approveHmyManger(contractAddr, managerAddr, amount) {
   await linkContract.methods.approve(managerAddr, amount).send(options);
 }
 
+async function changeLINKHmyManagerThreshold(managerAddr, threshold) {
+  const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
+  let hmyManagerContract = hmy.contracts.createContract(
+    hmyManagerJson.abi,
+    managerAddr
+  );
+  hmyManagerContract.wallet.setSigner(process.env.ADMIN);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  let res = await hmyManagerContract.methods.changeThreshold(threshold).send(options);
+  if (res.status == 'rejected') {
+    throw "transaction failed!!!";
+  }
+}
+
+async function authorizeLINKHmy(managerAddr, userAddr) {
+  const contractJson = require("../../build/contracts/LINKHmyManager.json");
+  let contract = hmy.contracts.createContract(contractJson.abi, managerAddr);
+  contract.wallet.setSigner(process.env.ADMIN);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+  let res = await contract.methods.rely(userAddr).send(options);
+  if (res.status == 'rejected') {
+    throw "transaction failed!!!";
+  }
+}
+
+async function registerToken(managerAddr, tokenManager, elinkAddr) {
+  const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
+  let hmyManagerContract = hmy.contracts.createContract(
+    hmyManagerJson.abi,
+    managerAddr
+  );
+  hmyManagerContract.wallet.setSigner(process.env.USER);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  await hmyManagerContract.methods
+    .register(tokenManager, elinkAddr)
+    .send(options);
+}
+
 async function mintToken(managerAddr, userAddr, amount, receiptId) {
   const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
@@ -79,6 +119,9 @@ module.exports = {
   checkHmyBalance,
   mintLINKHmy,
   approveHmyManger,
+  changeLINKHmyManagerThreshold,
+  authorizeLINKHmy,
+  registerToken,
   mintToken,
   burnToken,
 };

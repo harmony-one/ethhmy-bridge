@@ -2,18 +2,21 @@ require("dotenv").config();
 const Web3 = require("web3");
 const { deployEthLINK, deployLINKEthManager } = require("./deploy_eth");
 const { deployHmyLINK, deployLINKHmyManager } = require("./deploy_hmy");
+const { deployTokenManager, approveHmyMangerTokenManager } = require("../lib");
 const { sleep, BLOCK_TO_FINALITY, AVG_BLOCK_TIME } = require("../utils");
 const {
   checkEthBalance,
   mintLINK,
   approveEthManger,
   lockToken,
+  lockTokenFor,
   unlockToken,
 } = require("./eth");
 const {
   checkHmyBalance,
   mintLINKHmy,
   approveHmyManger,
+  registerToken,
   mintToken,
   burnToken,
 } = require("./hmy");
@@ -30,10 +33,20 @@ const web3 = new Web3(process.env.ETH_NODE_URL);
 
   // deploy harmony contracts
   let linkHmy = await deployHmyLINK();
+
+  // deploy token manager
+  let tokenManagerAddr = await deployTokenManager();
+
   let hmyManager = await deployLINKHmyManager(linkHmy);
   // link contracts mints 1B supply to deployer account
   // need to make harmony manager custodian for transfering to users
   await mintLINKHmy(linkHmy, hmyManager, 10000);
+
+  // approve hmyManager to register token
+  await approveHmyMangerTokenManager(tokenManagerAddr, hmyManager);
+
+  // hmyManager register token
+  await registerToken(hmyManager, tokenManagerAddr, link);
 
   // check eth balance before transfer
   console.log(
@@ -64,7 +77,7 @@ const web3 = new Web3(process.env.ETH_NODE_URL);
   await approveEthManger(link, ethManager, amount);
 
   // wait sufficient to confirm the transaction went through
-  const lockedEvent = await lockToken(ethManager, process.env.USER, amount);
+  const lockedEvent = await lockTokenFor(ethManager, userAddr, amount, process.env.USER);
 
   const expectedBlockNumber = lockedEvent.blockNumber + BLOCK_TO_FINALITY;
   while (true) {

@@ -25,7 +25,10 @@ async function deployBUSDHmy() {
 async function deployBUSDHmyManager(busdAddr) {
   const hmyManagerJson = require("../../build/contracts/BUSDHmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
-  let deployOptions = { data: hmyManagerJson.bytecode, arguments: [busdAddr] };
+  let deployOptions = {
+    data: hmyManagerJson.bytecode,
+    arguments: [busdAddr],
+  };
 
   let options = {
     gasPrice: 1000000000,

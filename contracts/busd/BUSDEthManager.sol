@@ -17,7 +17,12 @@ contract BUSDEthManager {
         address recipient
     );
 
-    event Unlocked(uint256 amount, address recipient);
+    event Unlocked(
+        address ethToken,
+        uint256 amount,
+        address recipient,
+        bytes32 receiptId
+    );
 
     mapping(address => uint256) public wards;
 
@@ -37,14 +42,27 @@ contract BUSDEthManager {
 
     address public owner;
 
+    uint16 public threshold;
+    mapping(bytes32 => uint16) confirmations;
+
     /**
      * @dev constructor
      * @param busd token contract address, e.g., erc20 contract
      */
     constructor(IBUSD busd) public {
         owner = msg.sender;
-        wards[msg.sender] = 1;
+        wards[owner] = 1;
         busd_ = busd;
+        threshold = 1;
+    }
+
+    /**
+     * @dev change threshold requirement
+     * @param newTheshold new threshold requirement
+     */
+    function changeThreshold(uint16 newTheshold) public {
+        require(msg.sender == owner, "EthManager/only owner can change threshold");
+        threshold = newTheshold;
     }
 
     /**
@@ -69,6 +87,31 @@ contract BUSDEthManager {
     }
 
     /**
+     * @dev lock tokens for an user address to be minted on harmony chain
+     * @param amount amount of tokens to lock
+     * @param recipient recipient address on the harmony chain
+     */
+    function lockTokenFor(
+        address userAddr,
+        uint256 amount,
+        address recipient
+    ) public auth {
+        require(
+            recipient != address(0),
+            "EthManager/recipient is a zero address"
+        );
+        require(amount > 0, "EthManager/zero token locked");
+        uint256 _balanceBefore = busd_.balanceOf(userAddr);
+        require(
+            busd_.transferFrom(userAddr, address(this), amount),
+            "EthManager/lock failed"
+        );
+        uint256 _balanceAfter = busd_.balanceOf(userAddr);
+        uint256 _actualAmount = _balanceBefore.sub(_balanceAfter);
+        emit Locked(address(busd_), userAddr, _actualAmount, recipient);
+    }
+
+    /**
      * @dev unlock tokens after burning them on harmony chain
      * @param amount amount of unlock tokens
      * @param recipient recipient of the unlock tokens
@@ -83,8 +126,14 @@ contract BUSDEthManager {
             !usedEvents_[receiptId],
             "EthManager/The burn event cannot be reused"
         );
+        confirmations[receiptId] = confirmations[receiptId] + 1;
+        if (confirmations[receiptId] < threshold) {
+            return;
+        }
         usedEvents_[receiptId] = true;
         require(busd_.transfer(recipient, amount), "EthManager/unlock failed");
-        emit Unlocked(amount, recipient);
+        emit Unlocked(address(busd_), amount, recipient, receiptId);
+        // delete confirmations entry for receiptId
+        delete confirmations[receiptId];
     }
 }

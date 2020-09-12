@@ -1,11 +1,16 @@
 pragma solidity 0.5.17;
-
-import "./ILINK.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../lib/TokenManager.sol";
 
-contract LINKHmyManager {
-    ILINK public hLINK;
+interface MintableToken {
+    function mint(address beneficiary, uint256 amount) external returns (bool);
+}
 
+interface BurnableToken {
+    function burnFrom(address account, uint256 amount) external;
+}
+
+contract HmyManager {
     mapping(bytes32 => bool) public usedEvents_;
 
     event Burned(
@@ -40,17 +45,17 @@ contract LINKHmyManager {
 
     address public owner;
 
+    mapping(address => address) public mappings;
+
     uint16 public threshold;
     mapping(bytes32 => uint16) confirmations;
 
     /**
      * @dev constructor
-     * @param _hLINK harmony token contract address
      */
-    constructor(ILINK _hLINK) public {
+    constructor() public {
         owner = msg.sender;
         wards[owner] = 1;
-        hLINK = _hLINK;
         threshold = 1;
     }
 
@@ -67,58 +72,77 @@ contract LINKHmyManager {
     }
 
     /**
-     * @dev register token mapping in the token manager
-     * @param tokenManager token manager contract address
-     * @param eLINK ethereum token contract address
+     * @dev map an ethereum token to harmony
+     * @param tokenManager address to token manager
+     * @param ethTokenAddr ethereum token address to map
+     * @param name of the ethereum token
+     * @param symbol of the ethereum token
+     * @param decimals of the ethereum token
      */
-    function register(address tokenManager, address eLINK) public auth {
-        TokenManager(tokenManager).registerToken(eLINK, address(hLINK));
+    function addToken(
+        address tokenManager,
+        address ethTokenAddr,
+        string memory name,
+        string memory symbol,
+        uint8 decimals
+    ) public {
+        address oneTokenAddr = TokenManager(tokenManager).addToken(
+            ethTokenAddr,
+            name,
+            symbol,
+            decimals
+        );
+        mappings[ethTokenAddr] = oneTokenAddr;
     }
 
     /**
      * @dev deregister token mapping in the token manager
-     * @param tokenManager token manager contract address
-     * @param eLINK ethereum token contract address
+     * @param tokenManager address to token manager
+     * @param ethTokenAddr address to remove token
      */
-    function deregister(address tokenManager, address eLINK) public auth {
-        TokenManager(tokenManager).removeToken(eLINK, 10**27);
+    function removeToken(address tokenManager, address ethTokenAddr) public {
+        TokenManager(tokenManager).removeToken(ethTokenAddr, 0);
     }
 
     /**
      * @dev burns tokens on harmony to be unlocked on ethereum
+     * @param oneToken harmony token address
      * @param amount amount of tokens to burn
      * @param recipient recipient of the unlock tokens on ethereum
      */
-    function burnToken(uint256 amount, address recipient) public {
-        require(
-            hLINK.transferFrom(msg.sender, address(this), amount),
-            "HmyManager/burn failed"
-        );
-        emit Burned(address(hLINK), msg.sender, amount, recipient);
+    function burnToken(
+        address oneToken,
+        uint256 amount,
+        address recipient
+    ) public {
+        BurnableToken(oneToken).burnFrom(msg.sender, amount);
+        emit Burned(oneToken, msg.sender, amount, recipient);
     }
 
     /**
      * @dev mints tokens corresponding to the tokens locked in the ethereum chain
+     * @param oneToken is the token address for minting
      * @param amount amount of tokens for minting
      * @param recipient recipient of the minted tokens (harmony address)
      * @param receiptId transaction hash of the lock event on ethereum chain
      */
     function mintToken(
+        address oneToken,
         uint256 amount,
         address recipient,
         bytes32 receiptId
     ) public auth {
         require(
             !usedEvents_[receiptId],
-            "HmyManager/The unlock event cannot be reused"
+            "HmyManager/The lock event cannot be reused"
         );
         confirmations[receiptId] = confirmations[receiptId] + 1;
         if (confirmations[receiptId] < threshold) {
             return;
         }
         usedEvents_[receiptId] = true;
-        require(hLINK.transfer(recipient, amount), "HmyManager/mint failed");
-        emit Minted(address(hLINK), amount, recipient, receiptId);
+        MintableToken(oneToken).mint(recipient, amount);
+        emit Minted(oneToken, amount, recipient, receiptId);
         // delete confirmations entry for receiptId
         delete confirmations[receiptId];
     }

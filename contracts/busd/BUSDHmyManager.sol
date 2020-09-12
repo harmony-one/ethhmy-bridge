@@ -1,9 +1,10 @@
 pragma solidity 0.5.17;
 
 import "./IBUSD.sol";
+import "../lib/TokenManager.sol";
 
 contract BUSDHmyManager {
-    IBUSD public busd_;
+    IBUSD public hBUSD;
 
     mapping(bytes32 => bool) public usedEvents_;
 
@@ -14,7 +15,12 @@ contract BUSDHmyManager {
         address recipient
     );
 
-    event Minted(uint256 amount, address recipient);
+    event Minted(
+        address oneToken,
+        uint256 amount,
+        address recipient,
+        bytes32 receiptId
+    );
 
     mapping(address => uint256) public wards;
 
@@ -34,14 +40,48 @@ contract BUSDHmyManager {
 
     address public owner;
 
+    uint16 public threshold;
+    mapping(bytes32 => uint16) confirmations;
+
     /**
      * @dev constructor
-     * @param busd token contract address on harmony chain, e.g., hrc20
+     * @param _hBUSD harmony busd token contract address
      */
-    constructor(IBUSD busd) public {
+    constructor(IBUSD _hBUSD) public {
         owner = msg.sender;
         wards[msg.sender] = 1;
-        busd_ = busd;
+        hBUSD = _hBUSD;
+        threshold = 1;
+    }
+
+    /**
+     * @dev change threshold requirement
+     * @param newTheshold new threshold requirement
+     */
+    function changeThreshold(uint16 newTheshold) public {
+        require(
+            msg.sender == owner,
+            "HmyManager/only owner can change threshold"
+        );
+        threshold = newTheshold;
+    }
+
+    /**
+     * @dev register token mapping in the token manager
+     * @param tokenManager address to token manager
+     * @param eBUSD address of the ethereum token
+     */
+    function register(address tokenManager, address eBUSD) public auth {
+        TokenManager(tokenManager).registerToken(eBUSD, address(hBUSD));
+    }
+
+    /**
+     * @dev deregister token mapping in the token manager
+     * @param tokenManager address to token manager
+     * @param eBUSD address of the ethereum token
+     */
+    function deregister(address tokenManager, address eBUSD) public auth {
+        TokenManager(tokenManager).removeToken(eBUSD, 0);
     }
 
     /**
@@ -51,11 +91,11 @@ contract BUSDHmyManager {
      */
     function burnToken(uint256 amount, address recipient) public {
         require(
-            busd_.transferFrom(msg.sender, address(this), amount),
+            hBUSD.transferFrom(msg.sender, address(this), amount),
             "HmyManager/could not transfer tokens from user"
         );
-        require(busd_.decreaseSupply(amount), "HmyManager/burn failed");
-        emit Burned(address(busd_), msg.sender, amount, recipient);
+        require(hBUSD.decreaseSupply(amount), "HmyManager/burn failed");
+        emit Burned(address(hBUSD), msg.sender, amount, recipient);
     }
 
     /**
@@ -73,12 +113,18 @@ contract BUSDHmyManager {
             !usedEvents_[receiptId],
             "HmyManager/The lock event cannot be reused"
         );
+        confirmations[receiptId] = confirmations[receiptId] + 1;
+        if (confirmations[receiptId] < threshold) {
+            return;
+        }
         usedEvents_[receiptId] = true;
-        require(busd_.increaseSupply(amount), "HmyManager/mint failed");
+        require(hBUSD.increaseSupply(amount), "HmyManager/mint failed");
         require(
-            busd_.transfer(recipient, amount),
+            hBUSD.transfer(recipient, amount),
             "HmyManager/transfer after mint failed"
         );
-        emit Minted(amount, recipient);
+        emit Minted(address(hBUSD), amount, recipient, receiptId);
+        // delete confirmations entry for receiptId
+        delete confirmations[receiptId];
     }
 }

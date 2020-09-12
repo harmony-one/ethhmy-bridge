@@ -71,6 +71,42 @@ async function approveEthManger(contractAddr, managerAddr, amount) {
   return transaction.events.Approval;
 }
 
+async function changeBUSDEthManagerThreshold(managerAddr, threshold) {
+  const web3 = new Web3(process.env.ETH_NODE_URL);
+  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
+    process.env.ETH_MASTER_PRIVATE_KEY
+  );
+  web3.eth.accounts.wallet.add(ethUserAccount);
+  web3.eth.defaultAccount = ethUserAccount.address;
+  ethUserAccount = ethUserAccount.address;
+
+  const contractJson = require("../../build/contracts/BUSDEthManager.json");
+  const contract = new web3.eth.Contract(contractJson.abi, managerAddr);
+  await contract.methods.changeThreshold(threshold).send({
+    from: ethUserAccount,
+    gas: process.env.ETH_GAS_LIMIT,
+    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
+  });
+}
+
+async function authorizeBUSDEth(managerAddr, userAddr) {
+  const web3 = new Web3(process.env.ETH_NODE_URL);
+  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
+    process.env.ETH_MASTER_PRIVATE_KEY
+  );
+  web3.eth.accounts.wallet.add(ethUserAccount);
+  web3.eth.defaultAccount = ethUserAccount.address;
+  ethUserAccount = ethUserAccount.address;
+
+  const contractJson = require("../../build/contracts/BUSDEthManager.json");
+  const contract = new web3.eth.Contract(contractJson.abi, managerAddr);
+  await contract.methods.rely(userAddr).send({
+    from: ethUserAccount,
+    gas: process.env.ETH_GAS_LIMIT,
+    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
+  });
+}
+
 async function lockToken(managerAddr, userAddr, amount) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
@@ -87,6 +123,30 @@ async function lockToken(managerAddr, userAddr, amount) {
   );
   let transaction = await managerContract.methods
     .lockToken(amount, userAddr)
+    .send({
+      from: ethUserAccount,
+      gas: process.env.ETH_GAS_LIMIT,
+      gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
+    });
+  return transaction.events.Locked;
+}
+
+async function lockTokenFor(managerAddr, userAddr, amount, recipient) {
+  const web3 = new Web3(process.env.ETH_NODE_URL);
+  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
+    process.env.ETH_MASTER_PRIVATE_KEY
+  );
+  web3.eth.accounts.wallet.add(ethUserAccount);
+  web3.eth.defaultAccount = ethUserAccount.address;
+  ethUserAccount = ethUserAccount.address;
+
+  const EthManagerJson = require("../../build/contracts/BUSDEthManager.json");
+  const managerContract = new web3.eth.Contract(
+    EthManagerJson.abi,
+    managerAddr
+  );
+  let transaction = await managerContract.methods
+    .lockTokenFor(userAddr, amount, recipient)
     .send({
       from: ethUserAccount,
       gas: process.env.ETH_GAS_LIMIT,
@@ -123,6 +183,9 @@ module.exports = {
   checkEthBalance,
   mintBUSD,
   approveEthManger,
+  changeBUSDEthManagerThreshold,
+  authorizeBUSDEth,
   lockToken,
+  lockTokenFor,
   unlockToken
 };

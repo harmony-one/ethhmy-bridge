@@ -128,14 +128,14 @@ contract EthManager {
         address recipient,
         bytes32 receiptId
     ) public auth {
-        require(
-            !usedEvents_[receiptId],
-            "EthManager/The burn event cannot be reused"
-        );
         confirmations[receiptId] = confirmations[receiptId] + 1;
         if (confirmations[receiptId] < threshold) {
             return;
         }
+        require(
+            !usedEvents_[receiptId],
+            "EthManager/The burn event cannot be reused"
+        );
         IERC20 ethToken = IERC20(ethTokenAddr);
         usedEvents_[receiptId] = true;
         ethToken.safeTransfer(recipient, amount);

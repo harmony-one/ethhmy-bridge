@@ -108,14 +108,14 @@ contract LINKHmyManager {
         address recipient,
         bytes32 receiptId
     ) public auth {
-        require(
-            !usedEvents_[receiptId],
-            "HmyManager/The unlock event cannot be reused"
-        );
         confirmations[receiptId] = confirmations[receiptId] + 1;
         if (confirmations[receiptId] < threshold) {
             return;
         }
+        require(
+            !usedEvents_[receiptId],
+            "HmyManager/The unlock event cannot be reused"
+        );
         usedEvents_[receiptId] = true;
         require(hLINK.transfer(recipient, amount), "HmyManager/mint failed");
         emit Minted(address(hLINK), amount, recipient, receiptId);

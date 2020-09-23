@@ -28,6 +28,25 @@ async function checkEthBalance(contract, addr) {
   return await ethBUSDContract.methods.balanceOf(addr).call();
 }
 
+async function setSupplyController(contractAddr, addr) {
+  const web3 = new Web3(process.env.ETH_NODE_URL);
+  let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
+    process.env.ETH_MASTER_PRIVATE_KEY
+  );
+  web3.eth.accounts.wallet.add(ethMasterAccount);
+  web3.eth.accounts.wallet.add(ethMasterAccount);
+  web3.eth.defaultAccount = ethMasterAccount.address;
+  ethMasterAccount = ethMasterAccount.address;
+
+  const busdJson = require("../../out/BUSDImplementation.json");
+  const busdContract = new web3.eth.Contract(busdJson.abi, contractAddr);
+  await busdContract.methods.setSupplyController(addr).send({
+    from: ethMasterAccount,
+    gas: process.env.ETH_GAS_LIMIT,
+    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
+  });
+}
+
 async function mintBUSD(contractAddr, accountAddr, amount) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
@@ -181,6 +200,7 @@ async function unlockToken(managerAddr, userAddr, amount, receiptId) {
 module.exports = {
   initBUSDEth,
   checkEthBalance,
+  setSupplyController,
   mintBUSD,
   approveEthManger,
   changeBUSDEthManagerThreshold,

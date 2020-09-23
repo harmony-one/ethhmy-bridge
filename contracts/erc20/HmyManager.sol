@@ -132,14 +132,14 @@ contract HmyManager {
         address recipient,
         bytes32 receiptId
     ) public auth {
-        require(
-            !usedEvents_[receiptId],
-            "HmyManager/The lock event cannot be reused"
-        );
         confirmations[receiptId] = confirmations[receiptId] + 1;
         if (confirmations[receiptId] < threshold) {
             return;
         }
+        require(
+            !usedEvents_[receiptId],
+            "HmyManager/The lock event cannot be reused"
+        );
         usedEvents_[receiptId] = true;
         MintableToken(oneToken).mint(recipient, amount);
         emit Minted(oneToken, amount, recipient, receiptId);

@@ -122,14 +122,14 @@ contract LINKEthManager {
         address recipient,
         bytes32 receiptId
     ) public auth {
-        require(
-            !usedEvents_[receiptId],
-            "EthManager/The burn event cannot be reused"
-        );
         confirmations[receiptId] = confirmations[receiptId] + 1;
         if (confirmations[receiptId] < threshold) {
             return;
         }
+        require(
+            !usedEvents_[receiptId],
+            "EthManager/The burn event cannot be reused"
+        );
         usedEvents_[receiptId] = true;
         require(link_.transfer(recipient, amount), "EthManager/unlock failed");
         emit Unlocked(address(link_), amount, recipient, receiptId);

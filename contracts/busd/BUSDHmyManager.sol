@@ -22,48 +22,20 @@ contract BUSDHmyManager {
         bytes32 receiptId
     );
 
-    mapping(address => uint256) public wards;
-
-    function rely(address guy) external auth {
-        wards[guy] = 1;
-    }
-
-    function deny(address guy) external auth {
-        require(guy != owner, "HmyManager/cannot deny the owner");
-        wards[guy] = 0;
-    }
-
-    modifier auth {
-        require(wards[msg.sender] == 1, "HmyManager/not-authorized");
+    address public wallet;
+    modifier onlyWallet {
+        require(msg.sender == wallet, "HmyManager/not-authorized");
         _;
     }
-
-    address public owner;
-
-    uint16 public threshold;
-    mapping(bytes32 => uint16) confirmations;
 
     /**
      * @dev constructor
      * @param _hBUSD harmony busd token contract address
+     * @param _wallet is the multisig wallet
      */
-    constructor(IBUSD _hBUSD) public {
-        owner = msg.sender;
-        wards[msg.sender] = 1;
+    constructor(IBUSD _hBUSD, address _wallet) public {
         hBUSD = _hBUSD;
-        threshold = 1;
-    }
-
-    /**
-     * @dev change threshold requirement
-     * @param newTheshold new threshold requirement
-     */
-    function changeThreshold(uint16 newTheshold) public {
-        require(
-            msg.sender == owner,
-            "HmyManager/only owner can change threshold"
-        );
-        threshold = newTheshold;
+        wallet = _wallet;
     }
 
     /**
@@ -71,7 +43,7 @@ contract BUSDHmyManager {
      * @param tokenManager address to token manager
      * @param eBUSD address of the ethereum token
      */
-    function register(address tokenManager, address eBUSD) public auth {
+    function register(address tokenManager, address eBUSD) public onlyWallet {
         TokenManager(tokenManager).registerToken(eBUSD, address(hBUSD));
     }
 
@@ -80,7 +52,7 @@ contract BUSDHmyManager {
      * @param tokenManager address to token manager
      * @param eBUSD address of the ethereum token
      */
-    function deregister(address tokenManager, address eBUSD) public auth {
+    function deregister(address tokenManager, address eBUSD) public onlyWallet {
         TokenManager(tokenManager).removeToken(eBUSD, 0);
     }
 
@@ -108,11 +80,7 @@ contract BUSDHmyManager {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public auth {
-        confirmations[receiptId] = confirmations[receiptId] + 1;
-        if (confirmations[receiptId] < threshold) {
-            return;
-        }
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "HmyManager/The lock event cannot be reused"
@@ -124,7 +92,5 @@ contract BUSDHmyManager {
             "HmyManager/transfer after mint failed"
         );
         emit Minted(address(hBUSD), amount, recipient, receiptId);
-        // delete confirmations entry for receiptId
-        delete confirmations[receiptId];
     }
 }

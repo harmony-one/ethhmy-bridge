@@ -22,48 +22,20 @@ contract LINKHmyManager {
         bytes32 receiptId
     );
 
-    mapping(address => uint256) public wards;
-
-    function rely(address guy) external auth {
-        wards[guy] = 1;
-    }
-
-    function deny(address guy) external auth {
-        require(guy != owner, "HmyManager/cannot deny the owner");
-        wards[guy] = 0;
-    }
-
-    modifier auth {
-        require(wards[msg.sender] == 1, "HmyManager/not-authorized");
+    address public wallet;
+    modifier onlyWallet {
+        require(msg.sender == wallet, "HmyManager/not-authorized");
         _;
     }
-
-    address public owner;
-
-    uint16 public threshold;
-    mapping(bytes32 => uint16) confirmations;
 
     /**
      * @dev constructor
      * @param _hLINK harmony token contract address
+     * @param _wallet is the multisig wallet
      */
-    constructor(ILINK _hLINK) public {
-        owner = msg.sender;
-        wards[owner] = 1;
+    constructor(ILINK _hLINK, address _wallet) public {
         hLINK = _hLINK;
-        threshold = 1;
-    }
-
-    /**
-     * @dev change threshold requirement
-     * @param newTheshold new threshold requirement
-     */
-    function changeThreshold(uint16 newTheshold) public {
-        require(
-            msg.sender == owner,
-            "HmyManager/only owner can change threshold"
-        );
-        threshold = newTheshold;
+        wallet = _wallet;
     }
 
     /**
@@ -71,7 +43,7 @@ contract LINKHmyManager {
      * @param tokenManager token manager contract address
      * @param eLINK ethereum token contract address
      */
-    function register(address tokenManager, address eLINK) public auth {
+    function register(address tokenManager, address eLINK) public onlyWallet {
         TokenManager(tokenManager).registerToken(eLINK, address(hLINK));
     }
 
@@ -80,7 +52,7 @@ contract LINKHmyManager {
      * @param tokenManager token manager contract address
      * @param eLINK ethereum token contract address
      */
-    function deregister(address tokenManager, address eLINK) public auth {
+    function deregister(address tokenManager, address eLINK) public onlyWallet {
         TokenManager(tokenManager).removeToken(eLINK, 10**27);
     }
 
@@ -107,11 +79,7 @@ contract LINKHmyManager {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public auth {
-        confirmations[receiptId] = confirmations[receiptId] + 1;
-        if (confirmations[receiptId] < threshold) {
-            return;
-        }
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "HmyManager/The unlock event cannot be reused"
@@ -119,7 +87,5 @@ contract LINKHmyManager {
         usedEvents_[receiptId] = true;
         require(hLINK.transfer(recipient, amount), "HmyManager/mint failed");
         emit Minted(address(hLINK), amount, recipient, receiptId);
-        // delete confirmations entry for receiptId
-        delete confirmations[receiptId];
     }
 }

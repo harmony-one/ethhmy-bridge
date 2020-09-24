@@ -1,9 +1,10 @@
 pragma solidity 0.5.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "./BridgedToken.sol";
 
-contract TokenManager {
+contract TokenManager is Ownable {
     // ethtoken to onetoken mapping
     mapping(address => address) public mappedTokens;
 
@@ -11,12 +12,12 @@ contract TokenManager {
 
     mapping(address => uint256) public wards;
 
-    function rely(address guy) external auth {
+    function rely(address guy) external onlyOwner {
         wards[guy] = 1;
     }
 
-    function deny(address guy) external auth {
-        require(guy != owner, "TokenManager/cannot deny the owner");
+    function deny(address guy) external onlyOwner {
+        require(guy != owner(), "TokenManager/cannot deny the owner");
         wards[guy] = 0;
     }
 
@@ -24,16 +25,6 @@ contract TokenManager {
     modifier auth {
         require(wards[msg.sender] == 1, "TokenManager/not-authorized");
         _;
-    }
-
-    address public owner;
-
-    /**
-     * @dev constructor
-     */
-    constructor() public {
-        owner = msg.sender;
-        wards[owner] = 1;
     }
 
     /**

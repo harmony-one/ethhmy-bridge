@@ -24,45 +24,20 @@ contract LINKEthManager {
         bytes32 receiptId
     );
 
-    mapping(address => uint256) public wards;
-
-    function rely(address guy) external auth {
-        wards[guy] = 1;
-    }
-
-    function deny(address guy) external auth {
-        require(guy != owner, "EthManager/cannot deny the owner");
-        wards[guy] = 0;
-    }
-
-    modifier auth {
-        require(wards[msg.sender] == 1, "EthManager/not-authorized");
+    address public wallet;
+    modifier onlyWallet {
+        require(msg.sender == wallet, "HmyManager/not-authorized");
         _;
     }
-
-    address public owner;
-
-    uint16 public threshold;
-    mapping(bytes32 => uint16) confirmations;
 
     /**
      * @dev constructor
      * @param link token contract address, e.g., erc20 contract
+     * @param _wallet is the multisig wallet
      */
-    constructor(ILINK link) public {
-        owner = msg.sender;
-        wards[owner] = 1;
+    constructor(ILINK link, address _wallet) public {
         link_ = link;
-        threshold = 1;
-    }
-
-    /**
-     * @dev change threshold requirement
-     * @param newTheshold new threshold requirement
-     */
-    function changeThreshold(uint16 newTheshold) public {
-        require(msg.sender == owner, "EthManager/only owner can change threshold");
-        threshold = newTheshold;
+        wallet = _wallet;
     }
 
     /**
@@ -95,7 +70,7 @@ contract LINKEthManager {
         address userAddr,
         uint256 amount,
         address recipient
-    ) public auth {
+    ) public onlyWallet {
         require(
             recipient != address(0),
             "EthManager/recipient is a zero address"
@@ -121,11 +96,7 @@ contract LINKEthManager {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public auth {
-        confirmations[receiptId] = confirmations[receiptId] + 1;
-        if (confirmations[receiptId] < threshold) {
-            return;
-        }
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "EthManager/The burn event cannot be reused"
@@ -133,7 +104,5 @@ contract LINKEthManager {
         usedEvents_[receiptId] = true;
         require(link_.transfer(recipient, amount), "EthManager/unlock failed");
         emit Unlocked(address(link_), amount, recipient, receiptId);
-        // delete confirmations entry for receiptId
-        delete confirmations[receiptId];
     }
 }

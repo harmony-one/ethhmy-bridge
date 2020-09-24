@@ -12,6 +12,7 @@ interface BurnableToken {
 
 contract HmyManager {
     mapping(bytes32 => bool) public usedEvents_;
+    mapping(address => address) public mappings;
 
     event Burned(
         address indexed token,
@@ -27,48 +28,18 @@ contract HmyManager {
         bytes32 receiptId
     );
 
-    mapping(address => uint256) public wards;
-
-    function rely(address guy) external auth {
-        wards[guy] = 1;
-    }
-
-    function deny(address guy) external auth {
-        require(guy != owner, "HmyManager/cannot deny the owner");
-        wards[guy] = 0;
-    }
-
-    modifier auth {
-        require(wards[msg.sender] == 1, "HmyManager/not-authorized");
+    address public wallet;
+    modifier onlyWallet {
+        require(msg.sender == wallet, "HmyManager/not-authorized");
         _;
     }
 
-    address public owner;
-
-    mapping(address => address) public mappings;
-
-    uint16 public threshold;
-    mapping(bytes32 => uint16) confirmations;
-
     /**
      * @dev constructor
+     * @param _wallet is the multisig wallet
      */
-    constructor() public {
-        owner = msg.sender;
-        wards[owner] = 1;
-        threshold = 1;
-    }
-
-    /**
-     * @dev change threshold requirement
-     * @param newTheshold new threshold requirement
-     */
-    function changeThreshold(uint16 newTheshold) public {
-        require(
-            msg.sender == owner,
-            "HmyManager/only owner can change threshold"
-        );
-        threshold = newTheshold;
+    constructor(address _wallet) public {
+        wallet = _wallet;
     }
 
     /**
@@ -131,11 +102,7 @@ contract HmyManager {
         uint256 amount,
         address recipient,
         bytes32 receiptId
-    ) public auth {
-        confirmations[receiptId] = confirmations[receiptId] + 1;
-        if (confirmations[receiptId] < threshold) {
-            return;
-        }
+    ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "HmyManager/The lock event cannot be reused"
@@ -143,7 +110,5 @@ contract HmyManager {
         usedEvents_[receiptId] = true;
         MintableToken(oneToken).mint(recipient, amount);
         emit Minted(oneToken, amount, recipient, receiptId);
-        // delete confirmations entry for receiptId
-        delete confirmations[receiptId];
     }
 }

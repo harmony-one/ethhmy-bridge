@@ -32,7 +32,7 @@ async function checkHmyBalance(contract, addr) {
 }
 
 async function getMappingFor(managerAddr, erc20TokenAddr) {
-  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/ERC20HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
     managerAddr
@@ -54,7 +54,7 @@ async function approveHmyManger(contract, spender, amount) {
 }
 
 async function addToken(managerAddr, tokenManagerAddr, erc20TokenAddr, name, symbol, decimals) {
-  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/ERC20HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
     managerAddr
@@ -68,7 +68,7 @@ async function addToken(managerAddr, tokenManagerAddr, erc20TokenAddr, name, sym
 }
 
 async function mintToken(managerAddr, oneTokenAddr, userAddr, amount, receiptId) {
-  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/ERC20HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
     managerAddr

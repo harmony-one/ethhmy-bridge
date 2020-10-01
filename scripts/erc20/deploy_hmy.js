@@ -9,7 +9,7 @@ hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
 
 async function deployHmyManager(wallet) {
-  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/ERC20HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
   hmyManagerContract.wallet.setSigner(process.env.ADMIN);
   let deployOptions = { data: hmyManagerJson.bytecode, arguments: [wallet] };

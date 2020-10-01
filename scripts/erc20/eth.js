@@ -66,7 +66,7 @@ async function lockToken(managerAddr, ethToken, userAddr, amount) {
   web3.eth.defaultAccount = ethUserAccount.address;
   ethUserAccount = ethUserAccount.address;
 
-  const EthManagerJson = require("../../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/ERC20EthManager.json");
   const managerContract = new web3.eth.Contract(
     EthManagerJson.abi,
     managerAddr
@@ -96,7 +96,7 @@ async function lockTokenFor(
   web3.eth.defaultAccount = ethUserAccount.address;
   ethUserAccount = ethUserAccount.address;
 
-  const EthManagerJson = require("../../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/ERC20EthManager.json");
   const managerContract = new web3.eth.Contract(
     EthManagerJson.abi,
     managerAddr
@@ -121,7 +121,7 @@ async function unlockToken(managerAddr, ethToken, userAddr, amount, receiptId) {
   web3.eth.defaultAccount = ethMasterAccount.address;
   ethMasterAccount = ethMasterAccount.address;
 
-  const EthManagerJson = require("../../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/ERC20EthManager.json");
   const managerContract = new web3.eth.Contract(
     EthManagerJson.abi,
     managerAddr

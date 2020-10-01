@@ -37,7 +37,7 @@ async function deployEthManager(wallet) {
   web3.eth.defaultAccount = ethMasterAccount.address;
   ethMasterAccount = ethMasterAccount.address;
 
-  const EthManagerJson = require("../../build/contracts/EthManager.json");
+  const EthManagerJson = require("../../build/contracts/ERC20EthManager.json");
   const managerContract = new web3.eth.Contract(EthManagerJson.abi);
   const txContract = await managerContract
     .deploy({

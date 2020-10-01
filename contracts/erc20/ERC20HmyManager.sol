@@ -10,7 +10,7 @@ interface BurnableToken {
     function burnFrom(address account, uint256 amount) external;
 }
 
-contract HmyManager {
+contract ERC20HmyManager {
     mapping(bytes32 => bool) public usedEvents_;
     mapping(address => address) public mappings;
 

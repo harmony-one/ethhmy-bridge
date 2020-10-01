@@ -3,7 +3,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract EthManager {
+contract ERC20EthManager {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 

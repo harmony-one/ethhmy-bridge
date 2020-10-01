@@ -28,7 +28,7 @@ async function deployERC20(name, symbol, decimals) {
   return erc20;
 }
 
-async function deployEthManager() {
+async function deployEthManager(wallet) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
     process.env.ETH_MASTER_PRIVATE_KEY
@@ -42,6 +42,7 @@ async function deployEthManager() {
   const txContract = await managerContract
     .deploy({
       data: EthManagerJson.bytecode,
+      arguments: [wallet]
     })
     .send({
       from: ethMasterAccount,
@@ -52,8 +53,9 @@ async function deployEthManager() {
   console.log("Deployed EthManager contract to", manager);
   return manager;
 }
+// deployEthManager('0x3cD9Cd47EcF788dA643399E4e7afefC9Eb7c89Dc').then(() => {});s
 
 module.exports = {
   deployERC20,
-  deployEthManager,
+  deployEthManager
 };

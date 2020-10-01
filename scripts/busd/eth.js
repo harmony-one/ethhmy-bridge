@@ -90,42 +90,6 @@ async function approveEthManger(contractAddr, managerAddr, amount) {
   return transaction.events.Approval;
 }
 
-async function changeBUSDEthManagerThreshold(managerAddr, threshold) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
-  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
-    process.env.ETH_MASTER_PRIVATE_KEY
-  );
-  web3.eth.accounts.wallet.add(ethUserAccount);
-  web3.eth.defaultAccount = ethUserAccount.address;
-  ethUserAccount = ethUserAccount.address;
-
-  const contractJson = require("../../build/contracts/BUSDEthManager.json");
-  const contract = new web3.eth.Contract(contractJson.abi, managerAddr);
-  await contract.methods.changeThreshold(threshold).send({
-    from: ethUserAccount,
-    gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
-  });
-}
-
-async function authorizeBUSDEth(managerAddr, userAddr) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
-  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
-    process.env.ETH_MASTER_PRIVATE_KEY
-  );
-  web3.eth.accounts.wallet.add(ethUserAccount);
-  web3.eth.defaultAccount = ethUserAccount.address;
-  ethUserAccount = ethUserAccount.address;
-
-  const contractJson = require("../../build/contracts/BUSDEthManager.json");
-  const contract = new web3.eth.Contract(contractJson.abi, managerAddr);
-  await contract.methods.rely(userAddr).send({
-    from: ethUserAccount,
-    gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
-  });
-}
-
 async function lockToken(managerAddr, userAddr, amount) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
@@ -203,8 +167,6 @@ module.exports = {
   setSupplyController,
   mintBUSD,
   approveEthManger,
-  changeBUSDEthManagerThreshold,
-  authorizeBUSDEth,
   lockToken,
   lockTokenFor,
   unlockToken

@@ -57,42 +57,6 @@ async function approveEthManger(contractAddr, managerAddr, amount) {
   });
 }
 
-async function changeERC20EthManagerThreshold(managerAddr, threshold) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
-  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
-    process.env.ETH_MASTER_PRIVATE_KEY
-  );
-  web3.eth.accounts.wallet.add(ethUserAccount);
-  web3.eth.defaultAccount = ethUserAccount.address;
-  ethUserAccount = ethUserAccount.address;
-
-  const contractJson = require("../../build/contracts/EthManager.json");
-  const contract = new web3.eth.Contract(contractJson.abi, managerAddr);
-  await contract.methods.changeThreshold(threshold).send({
-    from: ethUserAccount,
-    gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
-  });
-}
-
-async function authorizeERC20Eth(managerAddr, userAddr) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
-  let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
-    process.env.ETH_MASTER_PRIVATE_KEY
-  );
-  web3.eth.accounts.wallet.add(ethUserAccount);
-  web3.eth.defaultAccount = ethUserAccount.address;
-  ethUserAccount = ethUserAccount.address;
-
-  const contractJson = require("../../build/contracts/EthManager.json");
-  const contract = new web3.eth.Contract(contractJson.abi, managerAddr);
-  await contract.methods.rely(userAddr).send({
-    from: ethUserAccount,
-    gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)),
-  });
-}
-
 async function lockToken(managerAddr, ethToken, userAddr, amount) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
@@ -117,7 +81,13 @@ async function lockToken(managerAddr, ethToken, userAddr, amount) {
   return transaction.events.Locked;
 }
 
-async function lockTokenFor(managerAddr, ethToken, userAddr, amount, recipient) {
+async function lockTokenFor(
+  managerAddr,
+  ethToken,
+  userAddr,
+  amount,
+  recipient
+) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
     process.env.ETH_MASTER_PRIVATE_KEY
@@ -157,11 +127,13 @@ async function unlockToken(managerAddr, ethToken, userAddr, amount, receiptId) {
     managerAddr
   );
 
-  await managerContract.methods.unlockToken(ethToken, amount, userAddr, receiptId).send({
-    from: ethMasterAccount,
-    gas: process.env.ETH_GAS_LIMIT,
-    gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
-  });
+  await managerContract.methods
+    .unlockToken(ethToken, amount, userAddr, receiptId)
+    .send({
+      from: ethMasterAccount,
+      gas: process.env.ETH_GAS_LIMIT,
+      gasPrice: new BN(await web3.eth.getGasPrice()).mul(new BN(1)), //new BN(process.env.ETH_GAS_PRICE)
+    });
 }
 
 module.exports = {
@@ -169,8 +141,6 @@ module.exports = {
   checkEthBalance,
   tokenDetails,
   approveEthManger,
-  changeERC20EthManagerThreshold,
-  authorizeERC20Eth,
   lockToken,
   lockTokenFor,
   unlockToken,

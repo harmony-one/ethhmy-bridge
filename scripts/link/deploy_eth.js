@@ -28,7 +28,7 @@ async function deployEthLINK() {
   return link;
 }
 
-async function deployLINKEthManager(linkAddr) {
+async function deployLINKEthManager(linkAddr, wallet) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
     process.env.ETH_MASTER_PRIVATE_KEY
@@ -42,7 +42,7 @@ async function deployLINKEthManager(linkAddr) {
   const txContract = await managerContract
     .deploy({
       data: EthManagerJson.bytecode,
-      arguments: [linkAddr],
+      arguments: [linkAddr, wallet],
     })
     .send({
       from: ethMasterAccount,

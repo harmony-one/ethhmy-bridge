@@ -53,32 +53,6 @@ async function approveHmyManger(contract, spender, amount) {
   await erc20Contract.methods.approve(spender, amount).send(options);
 }
 
-async function changeERC20HmyManagerThreshold(managerAddr, threshold) {
-  const hmyManagerJson = require("../../build/contracts/HmyManager.json");
-  let hmyManagerContract = hmy.contracts.createContract(
-    hmyManagerJson.abi,
-    managerAddr
-  );
-  hmyManagerContract.wallet.setSigner(process.env.ADMIN);
-  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
-
-  let res = await hmyManagerContract.methods.changeThreshold(threshold).send(options);
-  if (res.status == 'rejected') {
-    throw "transaction failed!!!";
-  }
-}
-
-async function authorizeERC20Hmy(managerAddr, userAddr) {
-  const contractJson = require("../../build/contracts/HmyManager.json");
-  let contract = hmy.contracts.createContract(contractJson.abi, managerAddr);
-  contract.wallet.setSigner(process.env.ADMIN);
-  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
-  let res = await contract.methods.rely(userAddr).send(options);
-  if (res.status == 'rejected') {
-    throw "transaction failed!!!";
-  }
-}
-
 async function addToken(managerAddr, tokenManagerAddr, erc20TokenAddr, name, symbol, decimals) {
   const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
@@ -129,8 +103,6 @@ module.exports = {
   checkHmyBalance,
   getMappingFor,
   approveHmyManger,
-  changeERC20HmyManagerThreshold,
-  authorizeERC20Hmy,
   addToken,
   mintToken,
   burnToken,

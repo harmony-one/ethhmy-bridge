@@ -9,6 +9,7 @@ const hmy = new Harmony(process.env.HMY_NODE_URL, {
 });
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
+hmy.wallet.addByPrivateKey(process.env.HMY_OWNER_PRIVATE_KEY);
 let options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
 async function checkHmyBalance(contract, addr) {
@@ -44,39 +45,13 @@ async function approveHmyManger(contractAddr, managerAddr, amount) {
   await linkContract.methods.approve(managerAddr, amount).send(options);
 }
 
-async function changeLINKHmyManagerThreshold(managerAddr, threshold) {
-  const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
-  let hmyManagerContract = hmy.contracts.createContract(
-    hmyManagerJson.abi,
-    managerAddr
-  );
-  hmyManagerContract.wallet.setSigner(process.env.ADMIN);
-  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
-
-  let res = await hmyManagerContract.methods.changeThreshold(threshold).send(options);
-  if (res.status == 'rejected') {
-    throw "transaction failed!!!";
-  }
-}
-
-async function authorizeLINKHmy(managerAddr, userAddr) {
-  const contractJson = require("../../build/contracts/LINKHmyManager.json");
-  let contract = hmy.contracts.createContract(contractJson.abi, managerAddr);
-  contract.wallet.setSigner(process.env.ADMIN);
-  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
-  let res = await contract.methods.rely(userAddr).send(options);
-  if (res.status == 'rejected') {
-    throw "transaction failed!!!";
-  }
-}
-
 async function registerToken(managerAddr, tokenManager, elinkAddr) {
   const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(
     hmyManagerJson.abi,
     managerAddr
   );
-  hmyManagerContract.wallet.setSigner(process.env.USER);
+  hmyManagerContract.wallet.setSigner(process.env.HMY_OWNER);
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
 
   await hmyManagerContract.methods
@@ -119,8 +94,6 @@ module.exports = {
   checkHmyBalance,
   mintLINKHmy,
   approveHmyManger,
-  changeLINKHmyManagerThreshold,
-  authorizeLINKHmy,
   registerToken,
   mintToken,
   burnToken,

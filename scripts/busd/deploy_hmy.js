@@ -22,12 +22,12 @@ async function deployBUSDHmy() {
   return busdAddr;
 }
 
-async function deployBUSDHmyManager(busdAddr) {
+async function deployBUSDHmyManager(busdAddr, wallet) {
   const hmyManagerJson = require("../../build/contracts/BUSDHmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
   let deployOptions = {
     data: hmyManagerJson.bytecode,
-    arguments: [busdAddr],
+    arguments: [busdAddr, wallet],
   };
 
   let options = {

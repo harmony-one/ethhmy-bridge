@@ -22,12 +22,12 @@ async function deployHmyLINK() {
   return linkAddr;
 }
 
-async function deployLINKHmyManager(linkAddr) {
+async function deployLINKHmyManager(linkAddr, wallet) {
   const hmyManagerJson = require("../../build/contracts/LINKHmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
   let deployOptions = {
     data: hmyManagerJson.bytecode,
-    arguments: [linkAddr],
+    arguments: [linkAddr, wallet],
   };
 
   let options = {

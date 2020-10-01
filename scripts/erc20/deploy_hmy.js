@@ -8,11 +8,11 @@ const hmy = new Harmony(process.env.HMY_NODE_URL, {
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
 
-async function deployHmyManager() {
+async function deployHmyManager(wallet) {
   const hmyManagerJson = require("../../build/contracts/HmyManager.json");
   let hmyManagerContract = hmy.contracts.createContract(hmyManagerJson.abi);
   hmyManagerContract.wallet.setSigner(process.env.ADMIN);
-  let deployOptions = { data: hmyManagerJson.bytecode };
+  let deployOptions = { data: hmyManagerJson.bytecode, arguments: [wallet] };
 
   let options = {
     gasPrice: 1000000000,

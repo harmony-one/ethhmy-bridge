@@ -1,11 +1,11 @@
 require("dotenv").config();
 const { Harmony } = require("@harmony-js/core");
-const { ChainID, ChainType } = require("@harmony-js/utils");
+const { ChainID, ChainType, hexToNumber } = require("@harmony-js/utils");
 const { toUtf8Bytes } = require("@harmony-js/contract");
 const { hexlify } = require("@harmony-js/crypto");
 const hmy = new Harmony(process.env.HMY_NODE_URL, {
   chainType: ChainType.Harmony,
-  chainId: ChainID.HmyTestnet,
+  chainId: Number(process.env.HMY_CHAIN_ID),
 });
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
@@ -30,8 +30,10 @@ async function mintLINKHmy(contractAddr, accountAddr, amount) {
     contractAddr
   );
   linkContract.wallet.setSigner(process.env.ADMIN);
+  let amt = hexToNumber(amount)
+  console.log(amt);
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
-  await linkContract.methods.transfer(accountAddr, amount).send(options);
+  await linkContract.methods.transfer(accountAddr, amt).send(options);
 }
 
 async function approveHmyManger(contractAddr, managerAddr, amount) {

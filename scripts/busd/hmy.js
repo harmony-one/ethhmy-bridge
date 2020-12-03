@@ -5,7 +5,7 @@ const { toUtf8Bytes } = require("@harmony-js/contract");
 const { hexlify } = require("@harmony-js/crypto");
 const hmy = new Harmony(process.env.HMY_NODE_URL, {
   chainType: ChainType.Harmony,
-  chainId: ChainID.HmyTestnet,
+  chainId: Number(process.env.HMY_CHAIN_ID),
 });
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);

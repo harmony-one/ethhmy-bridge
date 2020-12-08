@@ -52,8 +52,7 @@ contract EthManager {
             recipient != address(0),
             "EthManager/recipient is a zero address"
         );
-        uint256 amt = msg.value;
-        require(amount != amt, "EthManager/zero token locked");
+        require(msg.value == amount, "EthManager/zero token locked");
         emit Locked(address(ETH_ADDRESS), msg.sender, amount, recipient);
     }
 

@@ -15,6 +15,12 @@ contract BridgedNFTToken is ERC721Mintable, ERC721Burnable, ERC721Full {
         ethTokenAddr = _ethTokenAddr;
     }
 
+    function burnFrom(address owner, uint256 tokenId) public {
+        //solhint-disable-next-line max-line-length
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Burnable: caller is not owner nor approved");
+        _burn(owner, tokenId);
+    }
+
     function increment() public onlyMinter {
         counter += 1;
     }

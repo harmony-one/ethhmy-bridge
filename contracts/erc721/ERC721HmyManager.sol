@@ -95,7 +95,7 @@ contract ERC721HmyManager {
      * @param tokenIds tokenIds to burn
      * @param recipient recipient of the unlock tokens on ethereum
      */
-    function burnToken(
+    function burnTokens(
         address oneToken,
         uint256[] memory tokenIds,
         address recipient
@@ -124,8 +124,8 @@ contract ERC721HmyManager {
             !usedEvents_[receiptId],
             "HmyManager/The lock event cannot be reused"
         );
-        usedEvents_[receiptId] = true;
         MintableToken(oneToken).mint(recipient, tokenId);
+        usedEvents_[receiptId] = true;
         BridgedNFTToken(oneToken).increment();
         emit Minted(oneToken, tokenId, recipient, receiptId);
     }
@@ -147,11 +147,11 @@ contract ERC721HmyManager {
             !usedEvents_[receiptId],
             "HmyManager/The lock event cannot be reused"
         );
-        usedEvents_[receiptId] = true;
         for (uint256 index = 0; index < tokenIds.length; index++) {
             MintableToken(oneToken).mint(recipient, tokenIds[index]);
             BridgedNFTToken(oneToken).increment();
             emit Minted(oneToken, tokenIds[index], recipient, receiptId);
         }
+        usedEvents_[receiptId] = true;
     }
 }

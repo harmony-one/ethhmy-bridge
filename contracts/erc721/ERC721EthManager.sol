@@ -1,8 +1,9 @@
 pragma solidity 0.5.17;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721Holder.sol";
 
-contract ERC721EthManager {
+contract ERC721EthManager is ERC721Holder {
     using SafeMath for uint256;
 
     mapping(bytes32 => bool) public usedEvents_;
@@ -126,8 +127,8 @@ contract ERC721EthManager {
             "EthManager/The burn event cannot be reused"
         );
         IERC721 ethToken = IERC721(ethTokenAddr);
-        usedEvents_[receiptId] = true;
         ethToken.safeTransferFrom(address(this), recipient, tokenId);
+        usedEvents_[receiptId] = true;
         emit Unlocked(ethTokenAddr, tokenId, recipient, receiptId);
     }
 
@@ -149,10 +150,10 @@ contract ERC721EthManager {
             "EthManager/The burn event cannot be reused"
         );
         IERC721 ethToken = IERC721(ethTokenAddr);
-        usedEvents_[receiptId] = true;
         for (uint256 index = 0; index < tokenIds.length; index++) {
             ethToken.safeTransferFrom(address(this), recipient, tokenIds[index]);
             emit Unlocked(ethTokenAddr, tokenIds[index], recipient, receiptId);
         }
+        usedEvents_[receiptId] = true;
     }
 }

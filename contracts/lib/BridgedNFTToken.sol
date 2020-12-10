@@ -21,6 +21,11 @@ contract BridgedNFTToken is ERC721Mintable, ERC721Burnable, ERC721Full {
         _burn(owner, tokenId);
     }
 
+    function setTokenURI(uint256 tokenId, string memory tokenURI) public {
+        require(_msgSender() == ownerOf(tokenId), "only owner can set tokenURI");
+        _setTokenURI(tokenId, tokenURI);
+    }
+
     function increment() public onlyMinter {
         counter += 1;
     }

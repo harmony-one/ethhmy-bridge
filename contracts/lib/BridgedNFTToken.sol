@@ -10,9 +10,11 @@ contract BridgedNFTToken is ERC721Mintable, ERC721Burnable, ERC721Full {
     constructor(
         address _ethTokenAddr,
         string memory name,
-        string memory symbol
+        string memory symbol,
+        string memory baseURI
     ) public ERC721Full(name, symbol) {
         ethTokenAddr = _ethTokenAddr;
+        _setBaseURI(baseURI);
     }
 
     function burnFrom(address owner, uint256 tokenId) public {

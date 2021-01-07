@@ -49,17 +49,20 @@ contract ERC721HmyManager {
      * @param ethTokenAddr ethereum token address to map
      * @param name of the ethereum token
      * @param symbol of the ethereum token
+     * @param baseURI base URI of the token
      */
     function addToken(
         address tokenManager,
         address ethTokenAddr,
         string memory name,
-        string memory symbol
+        string memory symbol,
+        string memory baseURI
     ) public {
         address oneTokenAddr = NFTTokenManager(tokenManager).addToken(
             ethTokenAddr,
             name,
-            symbol
+            symbol,
+            baseURI
         );
         mappings[ethTokenAddr] = oneTokenAddr;
     }

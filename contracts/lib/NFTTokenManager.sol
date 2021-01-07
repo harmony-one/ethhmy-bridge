@@ -32,12 +32,14 @@ contract NFTTokenManager is Ownable {
      * @param ethTokenAddr address of the ethereum token
      * @param name name of the token
      * @param symbol of the token
+     * @param baseURI of the token
      * @return mintAddress of the mapped token
      */
     function addToken(
         address ethTokenAddr,
         string memory name,
-        string memory symbol
+        string memory symbol,
+        string memory baseURI
     ) public auth returns (address) {
         require(
             ethTokenAddr != address(0),
@@ -51,7 +53,8 @@ contract NFTTokenManager is Ownable {
         BridgedNFTToken bridgedToken = new BridgedNFTToken(
             ethTokenAddr,
             name,
-            symbol
+            symbol,
+            baseURI
         );
         address bridgedTokenAddr = address(bridgedToken);
 

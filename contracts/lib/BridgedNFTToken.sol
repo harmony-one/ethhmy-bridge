@@ -1,10 +1,10 @@
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "./ERC721FullCustom.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Mintable.sol";
 
-contract BridgedNFTToken is ERC721Mintable, ERC721Burnable, ERC721Full {
+contract BridgedNFTToken is ERC721Mintable, ERC721Burnable, ERC721FullCustom {
     address public ethTokenAddr;
     uint256 public counter;
     constructor(
@@ -12,7 +12,7 @@ contract BridgedNFTToken is ERC721Mintable, ERC721Burnable, ERC721Full {
         string memory name,
         string memory symbol,
         string memory baseURI
-    ) public ERC721Full(name, symbol) {
+    ) public ERC721FullCustom(name, symbol) {
         ethTokenAddr = _ethTokenAddr;
         _setBaseURI(baseURI);
     }

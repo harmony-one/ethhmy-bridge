@@ -74,6 +74,7 @@ contract ERC721HmyManager {
      */
     function removeToken(address tokenManager, address ethTokenAddr) public {
         NFTTokenManager(tokenManager).removeToken(ethTokenAddr, 0);
+        delete mappings[ethTokenAddr];
     }
 
     /**

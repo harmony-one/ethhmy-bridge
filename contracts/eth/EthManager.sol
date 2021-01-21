@@ -27,7 +27,7 @@ contract EthManager {
 
     address public wallet;
     modifier onlyWallet {
-        require(msg.sender == wallet, "HmyManager/not-authorized");
+        require(msg.sender == wallet, "EthManager/not-authorized");
         _;
     }
 

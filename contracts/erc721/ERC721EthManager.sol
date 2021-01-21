@@ -24,7 +24,7 @@ contract ERC721EthManager is ERC721Holder {
 
     address public wallet;
     modifier onlyWallet {
-        require(msg.sender == wallet, "HmyManager/not-authorized");
+        require(msg.sender == wallet, "EthManager/not-authorized");
         _;
     }
 

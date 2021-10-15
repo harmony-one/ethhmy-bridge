@@ -17,12 +17,28 @@ contract HRC1155HmyManager is ERC1155Holder {
         uint256 amount
     );
 
+    event BatchLocked(
+        address indexed token,
+        address indexed sender,
+        uint256[] tokenIds,
+        address recipient,
+        uint256[] amounts
+    );
+
     event Unlocked(
         address ethToken,
         uint256 tokenId,
         address recipient,
         bytes32 receiptId,
         uint256 amount
+    );
+
+    event BatchUnlocked(
+        address ethToken,
+        uint256[] tokenIds,
+        address recipient,
+        bytes32 receiptId,
+        uint256[] amounts
     );
 
     address public wallet;
@@ -64,14 +80,14 @@ contract HRC1155HmyManager is ERC1155Holder {
      * @param ethTokenAddr is the ethereum token contract address
      * @param tokenIds tokenIds of the token to lock
      * @param recipient recipient address on the harmony chain
-     * @param amount amount of the token
+     * @param amounts amounts of the token
      * @param data additional data with no specified format, sent in call to `_to`
      */
     function lockHRC1155Tokens(
         address ethTokenAddr,
         uint256[] memory tokenIds,
         address recipient,
-        uint256 amount,
+        uint256[] memory amounts,
         bytes memory data
     ) public {
         require(
@@ -79,18 +95,9 @@ contract HRC1155HmyManager is ERC1155Holder {
             "NFTHmyManager/recipient is a zero address"
         );
         IERC1155 ethToken = IERC1155(ethTokenAddr);
-        for (uint256 index = 0; index < tokenIds.length; index++) {
-            ethToken.safeTransferFrom(
-                msg.sender, address(this), tokenIds[index], amount, data
-            );
-            emit Locked(
-                address(ethToken),
-                msg.sender,
-                tokenIds[index],
-                recipient,
-                amount
-            );
-        }
+
+        ethToken.safeBatchTransferFrom(msg.sender, address(this), tokenIds, amounts, data);
+        emit BatchLocked(ethTokenAddr, msg.sender, tokenIds, recipient, amounts);
     }
 
     /**
@@ -125,7 +132,7 @@ contract HRC1155HmyManager is ERC1155Holder {
      * @param tokenIds tokenIds of the token to unlock
      * @param recipient recipient of the unlock tokens
      * @param receiptId transaction hash of the burn event on harmony chain
-     * @param amount amount of the token
+     * @param amounts amount of the token
      * @param data additional data with no specified format, sent in call to `_to`
      */
     function unlockHRC1155Tokens(
@@ -133,7 +140,7 @@ contract HRC1155HmyManager is ERC1155Holder {
         uint256[] memory tokenIds,
         address recipient,
         bytes32 receiptId,
-        uint256 amount,
+        uint256[] memory amounts,
         bytes memory data
     ) public onlyWallet {
         require(
@@ -141,10 +148,8 @@ contract HRC1155HmyManager is ERC1155Holder {
             "NFTHmyManager/The burn event cannot be reused"
         );
         IERC1155 ethToken = IERC1155(ethTokenAddr);
-        for (uint256 index = 0; index < tokenIds.length; index++) {
-            ethToken.safeTransferFrom(address(this), recipient, tokenIds[index], amount, data);
-            emit Unlocked(ethTokenAddr, tokenIds[index], recipient, receiptId, amount);
-        }
+        ethToken.safeBatchTransferFrom(address(this), recipient, tokenIds, amounts, data);
+        emit BatchUnlocked(ethTokenAddr, tokenIds, recipient, receiptId, amounts);
         usedEvents_[receiptId] = true;
     }
 }

@@ -179,8 +179,20 @@ MinterRole
         counter += amount;
     }
 
+    function batchIncrement(uint256[] memory amounts) public onlyMinter {
+        for (uint256 index = 0; index < amounts.length; index++) {
+            counter += amounts[index];
+        }
+    }
+
     function decrement(uint256 amount) public onlyMinter {
         counter -= amount;
+    }
+
+    function batchDecrement(uint256[] memory amounts) public onlyMinter {
+        for (uint256 index = 0; index < amounts.length; index++) {
+            counter -= amounts[index];
+        }
     }
 
     function checkSupply(uint256 value) public view returns (bool) {

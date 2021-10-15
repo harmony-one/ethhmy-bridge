@@ -6,10 +6,14 @@ import "../lib/Bridged1155Token.sol";
 
 interface MintableToken {
     function mint(address _to, uint256 _id, uint256 _quantity, bytes calldata _data) external;
+
+    function batchMint(address _to, uint256[] calldata _ids, uint256[] calldata _quantities, bytes calldata _data) external;
 }
 
 interface BurnableToken {
     function burn(address _from, uint256 _id, uint256 _amount) external;
+
+    function batchBurn(address _from, uint256[] calldata _ids, uint256[] calldata _amounts) external;
 }
 
 contract HRC1155EthManager {
@@ -24,12 +28,28 @@ contract HRC1155EthManager {
         uint256 amount
     );
 
+    event BatchBurned(
+        address indexed token,
+        address indexed sender,
+        uint256[] tokenIds,
+        address recipient,
+        uint256[] amounts
+    );
+
     event Minted(
         address oneToken,
         uint256 tokenId,
         address recipient,
         bytes32 receiptId,
         uint256 amount
+    );
+
+    event BatchMinted(
+        address oneToken,
+        uint256[] tokenIds,
+        address recipient,
+        bytes32 receiptId,
+        uint256[] amounts
     );
 
     address public wallet;
@@ -107,13 +127,11 @@ contract HRC1155EthManager {
         address oneToken,
         uint256[] memory tokenIds,
         address recipient,
-        uint256 amount
+        uint256[] memory amounts
     ) public {
-        for (uint256 index = 0; index < tokenIds.length; index++) {
-            BurnableToken(oneToken).burn(msg.sender, tokenIds[index], amount);
-            Bridged1155Token(oneToken).decrement(amount);
-            emit Burned(oneToken, msg.sender, tokenIds[index], recipient, amount);
-        }
+        BurnableToken(oneToken).batchBurn(msg.sender, tokenIds, amounts);
+        Bridged1155Token(oneToken).batchDecrement(amounts);
+        emit BatchBurned(oneToken, msg.sender, tokenIds, recipient, amounts);
     }
 
     /**
@@ -154,18 +172,17 @@ contract HRC1155EthManager {
         uint256[] memory tokenIds,
         address recipient,
         bytes32 receiptId,
-        uint256 amount,
+        uint256[] memory amounts,
         bytes memory data
     ) public onlyWallet {
         require(
             !usedEvents_[receiptId],
             "HmyManager/The lock event cannot be reused"
         );
-        for (uint256 index = 0; index < tokenIds.length; index++) {
-            MintableToken(oneToken).mint(recipient, tokenIds[index], amount, data);
-            Bridged1155Token(oneToken).increment(amount);
-            emit Minted(oneToken, tokenIds[index], recipient, receiptId, amount);
-        }
+
+        MintableToken(oneToken).batchMint(recipient, tokenIds, amounts, data);
+        Bridged1155Token(oneToken).batchIncrement(amounts);
+        emit BatchMinted(oneToken, tokenIds, recipient, receiptId, amounts);
 
         usedEvents_[receiptId] = true;
     }

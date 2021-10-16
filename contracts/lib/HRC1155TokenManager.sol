@@ -1,11 +1,9 @@
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "./BridgedNFTToken.sol";
-import "./BridgedNFT1155.sol";
+import "./Bridged1155Token.sol";
 
-contract NFTTokenManagerV2 is Ownable {
+contract HRC1155TokenManager is Ownable {
     // ethtoken to onetoken mapping
     mapping(address => address) public mappedTokens;
 
@@ -36,7 +34,7 @@ contract NFTTokenManagerV2 is Ownable {
      * @param baseURI of the token
      * @return mintAddress of the mapped token
      */
-    function addNFT721Token(
+    function addHRC1155Token(
         address ethTokenAddr,
         string memory name,
         string memory symbol,
@@ -51,48 +49,7 @@ contract NFTTokenManagerV2 is Ownable {
             "TokenManager/ethToken already mapped"
         );
 
-        BridgedNFTToken bridgedToken = new BridgedNFTToken(
-            ethTokenAddr,
-            name,
-            symbol,
-            baseURI
-        );
-        address bridgedTokenAddr = address(bridgedToken);
-
-        // store the mapping and created address
-        mappedTokens[ethTokenAddr] = bridgedTokenAddr;
-
-        // assign minter role to the caller
-        bridgedToken.addMinter(msg.sender);
-
-        emit TokenMapAck(ethTokenAddr, bridgedTokenAddr);
-        return bridgedTokenAddr;
-    }
-
-    /**
-     * @dev map ethereum token to harmony token and emit mintAddress
-     * @param ethTokenAddr address of the ethereum token
-     * @param name name of the token
-     * @param symbol of the token
-     * @param baseURI of the token
-     * @return mintAddress of the mapped token
-     */
-    function addNFT1155Token(
-        address ethTokenAddr,
-        string memory name,
-        string memory symbol,
-        string memory baseURI
-    ) public auth returns (address) {
-        require(
-            ethTokenAddr != address(0),
-            "TokenManager/ethToken is a zero address"
-        );
-        require(
-            mappedTokens[ethTokenAddr] == address(0),
-            "TokenManager/ethToken already mapped"
-        );
-
-        BridgedNFT1155 bridgedToken = new BridgedNFT1155(
+        Bridged1155Token bridgedToken = new Bridged1155Token(
             ethTokenAddr,
             name,
             symbol,
@@ -116,9 +73,9 @@ contract NFTTokenManagerV2 is Ownable {
      * @return oneToken of the mapped harmony token
      */
     function registerToken(address ethTokenAddr, address oneTokenAddr)
-        public
-        auth
-        returns (bool)
+    public
+    auth
+    returns (bool)
     {
         require(
             ethTokenAddr != address(0),
@@ -131,6 +88,8 @@ contract NFTTokenManagerV2 is Ownable {
 
         // store the mapping and created address
         mappedTokens[ethTokenAddr] = oneTokenAddr;
+
+        return true;
     }
 
     /**
@@ -138,30 +97,13 @@ contract NFTTokenManagerV2 is Ownable {
      * @param ethTokenAddr address of the ethereum token
      * @param supply only allow removing mapping when supply, e.g., zero or 10**27
      */
-    function removeToken(address ethTokenAddr, uint256 supply) public auth {
+    function removeHRC1155Token(address ethTokenAddr, uint256 supply) public auth {
         require(
             mappedTokens[ethTokenAddr] != address(0),
             "TokenManager/ethToken mapping does not exists"
         );
         require(
-            BridgedNFTToken(mappedTokens[ethTokenAddr]).checkSupply(supply),
-            "TokenManager/remove has non-zero supply"
-        );
-        delete mappedTokens[ethTokenAddr];
-    }
-
-    /**
-     * @dev remove an existing token mapping
-     * @param ethTokenAddr address of the ethereum token
-     * @param supply only allow removing mapping when supply, e.g., zero or 10**27
-     */
-    function removeNFT1155Token(address ethTokenAddr, uint256 supply) public auth {
-        require(
-            mappedTokens[ethTokenAddr] != address(0),
-            "TokenManager/ethToken mapping does not exists"
-        );
-        require(
-            BridgedNFT1155(mappedTokens[ethTokenAddr]).checkSupply(supply),
+            Bridged1155Token(mappedTokens[ethTokenAddr]).checkSupply(supply),
             "TokenManager/remove has non-zero supply"
         );
         delete mappedTokens[ethTokenAddr];

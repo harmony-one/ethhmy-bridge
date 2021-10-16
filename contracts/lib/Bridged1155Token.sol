@@ -7,34 +7,49 @@ import "../erc1155/ERC1155Metadata.sol";
 import "../erc1155/ERC1155MintBurn.sol";
 import "./StringsV2.sol";
 
-contract BridgedNFT1155 is
-    ERC1155,
-    ERC1155MintBurn,
-    ERC1155Metadata,
-    Ownable,
-    MinterRole
+contract Bridged1155Token is
+ERC1155,
+ERC1155MintBurn,
+ERC1155Metadata,
+Ownable,
+MinterRole
 {
     using StringsV2 for string;
 
     address public srcTokenAddr;
     uint256 public counter;
     // Contract name
-    string public name;
+    string private _name;
     // Contract symbol
-    string public symbol;
+    string private _symbol;
 
     mapping(uint256 => uint256) public tokenSupply;
 
     constructor(
         address _srcTokenAddr,
-        string memory _name,
-        string memory _symbol,
-        string memory _baseMetadataURI
+        string memory name,
+        string memory symbol,
+        string memory baseMetadataURI
     ) public {
         srcTokenAddr = _srcTokenAddr;
-        name = _name;
-        symbol = _symbol;
-        _setBaseMetadataURI(_baseMetadataURI);
+        _name = name;
+        _symbol = symbol;
+        _setBaseMetadataURI(baseMetadataURI);
+    }
+
+    /**
+     * @dev Returns the name of the token.
+     */
+    function name() public view returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev Returns the symbol of the token, usually a shorter version of the
+     * name.
+     */
+    function symbol() public view returns (string memory) {
+        return _symbol;
     }
 
     function uri(uint256 _id) public view returns (string memory) {
@@ -55,8 +70,8 @@ contract BridgedNFT1155 is
      * @param _newBaseMetadataURI New base URL of token's URI
      */
     function setBaseMetadataURI(string memory _newBaseMetadataURI)
-        public
-        onlyOwner
+    public
+    onlyOwner
     {
         _setBaseMetadataURI(_newBaseMetadataURI);
     }
@@ -99,8 +114,8 @@ contract BridgedNFT1155 is
         _batchMint(_to, _ids, _quantities, _data);
     }
 
-    function isOwnerOrApproved(address operator) internal view returns (bool) {
-        return (isOwner() || isApprovedForAll(owner(), operator));
+    function isOwnerOrApproved(address operator, address owner) internal view returns (bool) {
+        return (isOwner() || isApprovedForAll(owner, operator));
     }
 
     /**
@@ -115,7 +130,7 @@ contract BridgedNFT1155 is
         uint256 _amount
     ) public {
         require(
-            isOwnerOrApproved(_msgSender()),
+            isOwnerOrApproved(_msgSender(), _from),
             "BridgedNFT1155: caller is not owner nor approved"
         );
         //Substract _amount
@@ -141,7 +156,7 @@ contract BridgedNFT1155 is
             "BridgedNFT1155#batchBurn: INVALID_ARRAYS_LENGTH"
         );
         require(
-            isOwnerOrApproved(_msgSender()),
+            isOwnerOrApproved(_msgSender(), _from),
             "BridgedNFT1155: caller is not owner nor approved"
         );
 
@@ -160,12 +175,24 @@ contract BridgedNFT1155 is
         emit TransferBatch(msg.sender, _from, address(0x0), _ids, _amounts);
     }
 
-    function increment() public onlyMinter {
-        counter += 1;
+    function increment(uint256 amount) public onlyMinter {
+        counter += amount;
     }
 
-    function decrement() public onlyMinter {
-        counter -= 1;
+    function batchIncrement(uint256[] memory amounts) public onlyMinter {
+        for (uint256 index = 0; index < amounts.length; index++) {
+            counter += amounts[index];
+        }
+    }
+
+    function decrement(uint256 amount) public onlyMinter {
+        counter -= amount;
+    }
+
+    function batchDecrement(uint256[] memory amounts) public onlyMinter {
+        for (uint256 index = 0; index < amounts.length; index++) {
+            counter -= amounts[index];
+        }
     }
 
     function checkSupply(uint256 value) public view returns (bool) {

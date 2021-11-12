@@ -26,6 +26,22 @@ async function deployTokenManager() {
   return tokenManagerAddr;
 }
 
+async function deployNFTV2TokenManager() {
+  const tokenManagerJson = require("../build/contracts/NFTTokenManagerV2.json");
+  let tokenManagerContract = hmy.contracts.createContract(tokenManagerJson.abi);
+  tokenManagerContract.wallet.setSigner(process.env.ADMIN);
+  let deployOptions = { data: tokenManagerJson.bytecode };
+
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  let response = await tokenManagerContract.methods
+      .contractConstructor(deployOptions)
+      .send(options);
+  const tokenManagerAddr = response.transaction.receipt.contractAddress;
+  console.log("TokenManager contract deployed at " + tokenManagerAddr);
+  return tokenManagerAddr;
+}
+
 async function approveHmyMangerTokenManager(contract, addr) {
   const erc20ContractJson = require("../build/contracts/TokenManager.json");
   let erc20Contract = hmy.contracts.createContract(
@@ -137,11 +153,12 @@ async function submitTxHmy(contractAddr, destination, value, data) {
 
 module.exports = {
   deployTokenManager,
+  deployNFTV2TokenManager,
   approveHmyMangerTokenManager,
   checkEthAuthorization,
   checkHmyAuthorization,
   deployMultiSigWallet,
   deployMultiSigWalletHmy,
   submitTx,
-  submitTxHmy
+  submitTxHmy,
 };

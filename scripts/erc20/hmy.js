@@ -9,6 +9,8 @@ const hmy = new Harmony(process.env.HMY_NODE_URL, {
 });
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY);
 hmy.wallet.addByPrivateKey(process.env.PRIVATE_KEY_USER);
+hmy.wallet.addByPrivateKey(process.env.HMY_PRIVATE_KEY);
+hmy.wallet.addByPrivateKey(process.env.HMY_PRIVATE_KEY_USER);
 
 async function mintHRC20(contractAddr, accountAddr, amount) {
   const erc20ContractJson = require("../../build/contracts/BridgedToken.json");
@@ -51,6 +53,17 @@ async function approveHmyManger(contract, spender, amount) {
   erc20Contract.wallet.setSigner(process.env.USER);
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
   await erc20Contract.methods.approve(spender, amount).send(options);
+}
+
+async function relyERC1155TokenManger(contract, addr) {
+  const erc20ContractJson = require("../../build/contracts/HRC1155TokenManager.json");
+  let erc20Contract = hmy.contracts.createContract(
+      erc20ContractJson.abi,
+      contract
+  );
+  erc20Contract.wallet.setSigner(process.env.HMY_ADMIN);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+  await erc20Contract.methods.rely(addr).send(options);
 }
 
 async function addToken(managerAddr, tokenManagerAddr, erc20TokenAddr, name, symbol, decimals) {
@@ -98,6 +111,23 @@ async function burnToken(managerAddr, oneTokenAddr, userAddr, amount) {
   return response.transaction.id;
 }
 
+async function getManagerWallet(managerAddr) {
+  // const hmyManagerJson = require("../../build/contracts/NFTHmyManager.json");
+  const hmyManagerJson = require("../../build/contracts/MultiSigWallet.json");
+  let hmyManagerContract = hmy.contracts.createContract(
+      hmyManagerJson.abi,
+      managerAddr
+  );
+  hmyManagerContract.wallet.setSigner(process.env.HMY_USER);
+
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  let response = await hmyManagerContract.methods
+      .owners(2)
+      .call(options);
+  return response;
+}
+
 module.exports = {
   mintHRC20,
   checkHmyBalance,
@@ -106,4 +136,6 @@ module.exports = {
   addToken,
   mintToken,
   burnToken,
+  getManagerWallet,
+  relyERC1155TokenManger
 };

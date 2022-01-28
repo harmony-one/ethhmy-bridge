@@ -3,7 +3,7 @@ const Web3 = require("web3");
 const BN = require("bn.js");
 
 async function mintERC20(contractAddr, accountAddr, amount) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_MASTER_PRIVATE_KEY
     );
@@ -22,14 +22,14 @@ async function mintERC20(contractAddr, accountAddr, amount) {
 }
 
 async function checkEthBalance(contract, addr) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     const MyERC20Json = require("../../build/contracts/MyERC20.json");
     const erc20Contract = new web3.eth.Contract(MyERC20Json.abi, contract);
     return await erc20Contract.methods.balanceOf(addr).call();
 }
 
 async function tokenDetails(contract) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     const MyERC20Json = require("../../build/contracts/MyERC20.json");
     const erc20Contract = new web3.eth.Contract(MyERC20Json.abi, contract);
     return [
@@ -40,7 +40,7 @@ async function tokenDetails(contract) {
 }
 
 async function approveEthManger(contractAddr, managerAddr, amount) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_USER_PRIVATE_KEY
     );
@@ -58,7 +58,7 @@ async function approveEthManger(contractAddr, managerAddr, amount) {
 }
 
 async function relyNFTTokenManger(contractAddr, guy) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_USER_PRIVATE_KEY
     );
@@ -77,7 +77,7 @@ async function relyNFTTokenManger(contractAddr, guy) {
 }
 
 async function lockToken(managerAddr, ethToken, userAddr, amount) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_USER_PRIVATE_KEY
     );
@@ -107,7 +107,7 @@ async function lockTokenFor(
     amount,
     recipient
 ) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_MASTER_PRIVATE_KEY
     );
@@ -131,7 +131,7 @@ async function lockTokenFor(
 }
 
 async function unlockToken(managerAddr, ethToken, userAddr, amount, receiptId) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_MASTER_PRIVATE_KEY
     );
@@ -156,7 +156,7 @@ async function unlockToken(managerAddr, ethToken, userAddr, amount, receiptId) {
 }
 
 async function relyHRC1155TokenManger(contractAddr, guy) {
-    const web3 = new Web3(process.env.ETH_NODE_URL);
+    const web3 = new Web3(process.env.BSC_NODE_URL);
     let ethUserAccount = web3.eth.accounts.privateKeyToAccount(
         process.env.ETH_USER_PRIVATE_KEY
     );

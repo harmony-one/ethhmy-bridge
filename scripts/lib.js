@@ -13,7 +13,7 @@ hmy.wallet.addByPrivateKey(process.env.HMY_OWNER_PRIVATE_KEY);
 async function deployTokenManager() {
   const tokenManagerJson = require("../build/contracts/TokenManager.json");
   let tokenManagerContract = hmy.contracts.createContract(tokenManagerJson.abi);
-  tokenManagerContract.wallet.setSigner(process.env.ADMIN);
+  tokenManagerContract.wallet.setSigner(process.env.HMY_ADMIN);
   let deployOptions = { data: tokenManagerJson.bytecode };
 
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
@@ -21,6 +21,38 @@ async function deployTokenManager() {
   let response = await tokenManagerContract.methods
     .contractConstructor(deployOptions)
     .send(options);
+  const tokenManagerAddr = response.transaction.receipt.contractAddress;
+  console.log("TokenManager contract deployed at " + tokenManagerAddr);
+  return tokenManagerAddr;
+}
+
+async function deployNFTTokenManager() {
+  const tokenManagerJson = require("../build/contracts/NFTTokenManager.json");
+  let tokenManagerContract = hmy.contracts.createContract(tokenManagerJson.abi);
+  tokenManagerContract.wallet.setSigner(process.env.HMY_ADMIN);
+  let deployOptions = { data: tokenManagerJson.bytecode };
+
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  let response = await tokenManagerContract.methods
+      .contractConstructor(deployOptions)
+      .send(options);
+  const tokenManagerAddr = response.transaction.receipt.contractAddress;
+  console.log("NFTTokenManager contract deployed at " + tokenManagerAddr);
+  return tokenManagerAddr;
+}
+
+async function deployNFTV2TokenManager() {
+  const tokenManagerJson = require("../build/contracts/NFTTokenManagerV2.json");
+  let tokenManagerContract = hmy.contracts.createContract(tokenManagerJson.abi);
+  tokenManagerContract.wallet.setSigner(process.env.ADMIN);
+  let deployOptions = { data: tokenManagerJson.bytecode };
+
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+
+  let response = await tokenManagerContract.methods
+      .contractConstructor(deployOptions)
+      .send(options);
   const tokenManagerAddr = response.transaction.receipt.contractAddress;
   console.log("TokenManager contract deployed at " + tokenManagerAddr);
   return tokenManagerAddr;
@@ -35,6 +67,19 @@ async function approveHmyMangerTokenManager(contract, addr) {
   erc20Contract.wallet.setSigner(process.env.ADMIN);
   let options = { gasPrice: 1000000000, gasLimit: 6721900 };
   await erc20Contract.methods.rely(addr).send(options);
+  console.log("Rely TokenManger to ", guy);
+}
+
+async function approveHmyMangerNFTTokenManager(contract, addr) {
+  const erc20ContractJson = require("../build/contracts/NFTTokenManager.json");
+  let erc20Contract = hmy.contracts.createContract(
+      erc20ContractJson.abi,
+      contract
+  );
+  erc20Contract.wallet.setSigner(process.env.HMY_ADMIN);
+  let options = { gasPrice: 1000000000, gasLimit: 6721900 };
+  await erc20Contract.methods.rely(addr).send(options);
+  console.log("Rely NFTTokenManger to ", addr);
 }
 
 async function checkHmyAuthorization(contractFile, managerAddr, addr) {
@@ -137,11 +182,14 @@ async function submitTxHmy(contractAddr, destination, value, data) {
 
 module.exports = {
   deployTokenManager,
+  deployNFTV2TokenManager,
   approveHmyMangerTokenManager,
   checkEthAuthorization,
   checkHmyAuthorization,
   deployMultiSigWallet,
   deployMultiSigWalletHmy,
   submitTx,
-  submitTxHmy
+  submitTxHmy,
+  deployNFTTokenManager,
+  approveHmyMangerNFTTokenManager,
 };

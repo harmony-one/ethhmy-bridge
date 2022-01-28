@@ -3,7 +3,7 @@ const Web3 = require("web3");
 const BN = require("bn.js");
 
 async function deployERC20(name, symbol, decimals) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
     process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -29,7 +29,7 @@ async function deployERC20(name, symbol, decimals) {
 }
 
 async function deployEthManager() {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
     process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -55,7 +55,7 @@ async function deployEthManager() {
 }
 
 async function deployNFTTokenManager() {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -81,7 +81,7 @@ async function deployNFTTokenManager() {
 }
 
 async function deployNFTV2TokenManager() {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -107,7 +107,7 @@ async function deployNFTV2TokenManager() {
 }
 
 async function deployMintableEthNFTManager(wallet) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -133,7 +133,7 @@ async function deployMintableEthNFTManager(wallet) {
 }
 
 async function deployLockableEthNFTManager(wallet) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -159,7 +159,7 @@ async function deployLockableEthNFTManager(wallet) {
 }
 
 async function deployHRC1155EthManager(wallet) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -185,7 +185,7 @@ async function deployHRC1155EthManager(wallet) {
 }
 
 async function deployHRC1155TokenManager() {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -211,7 +211,7 @@ async function deployHRC1155TokenManager() {
 }
 
 async function deployMultiWallet() {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );
@@ -237,7 +237,7 @@ async function deployMultiWallet() {
 }
 
 async function deployERC1155EthManager(wallet) {
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3(process.env.POLYGON_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
       process.env.ETH_MASTER_PRIVATE_KEY
   );

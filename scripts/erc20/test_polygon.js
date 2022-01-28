@@ -5,12 +5,13 @@ const {
     deployEthManager,
     deployNFTTokenManager,
     deployNFTV2TokenManager,
-    deployEthNFTManager,
+    deployMintableEthNFTManager,
+    deployLockableEthNFTManager,
     deployMultiWallet,
     deployHRC1155EthManager,
     deployHRC1155TokenManager,
     deployERC1155EthManager
-} = require("./deploy_eth");
+} = require("./deploy_polygon");
 const {sleep, BLOCK_TO_FINALITY, AVG_BLOCK_TIME} = require("../utils");
 const {
     mintERC20,
@@ -20,31 +21,56 @@ const {
     unlockToken,
     relyNFTTokenManger,
     relyHRC1155TokenManger,
-} = require("./eth");
-const web3 = new Web3(process.env.ETH_NODE_URL);
+} = require("./polygon");
+const web3 = new Web3(process.env.POLYGON_NODE_URL);
 
 (async function () {
+    const target = "prc1155";
     const userAddr = process.env.ETH_USER_1155;
     const masterAddr = process.env.ETH_MASTER;
-    const multiSigWallet = "0x4D2F08369476F21D4DEB834b6EA9c41ACAd11413";
+    const multiSigWallet = "0xfFf6DF7bD6dc693Aa32731d168FA81A35e9bA0b2";
 
+    // let multiWallet = await deployMultiWallet();
     // return;
+    /** ==== HRC 721 === */
+    if (target === "hrc721" || target === "all") {
+        // HRC721TokenManager
+        let hRC721TokenManager = await deployNFTTokenManager();
+
+        // HRC721BscManager
+        let hRC721BscManager = await deployMintableEthNFTManager(multiSigWallet);
+
+        // rely manager
+        await relyNFTTokenManger(hRC721TokenManager, hRC721BscManager);
+    }
+    /** ==== HRC 721 === */
+
+    /** ==== PRC 721 === */
+    if (target === "prc721" || target === "all") {
+        // PRC721BscManager
+        let bEP721BscManager = await deployLockableEthNFTManager(multiSigWallet);
+    }
+    /** ==== PRC 721 === */
+
     /** ==== HRC 1155 === */
-    // HRC1155TokenManager
-    // let hRC1155TokenManager = await deployHRC1155TokenManager();
+    if (target === "hrc1155" || target === "all") {
+        // HRC1155TokenManager
+        let hRC1155TokenManager = await deployHRC1155TokenManager();
 
-    // HRC1155EthManager
-    // let hRC1155EthManager = await deployHRC1155EthManager(multiSigWallet);
+        // HRC1155EthManager
+        let hRC1155EthManager = await deployHRC1155EthManager(multiSigWallet);
 
-    // rely manager
-    // await relyHRC1155TokenManger(hRC1155TokenManager, hRC1155EthManager);
-
+        // rely manager
+        await relyHRC1155TokenManger(hRC1155TokenManager, hRC1155EthManager);
+    }
     /** ==== HRC 1155 === */
 
-    /** ==== ERC 1155 === */
-    // ERC1155EthManager
-    let eRC1155HmyManager = await deployERC1155EthManager(multiSigWallet);
-    /** ==== ERC 1155 === */
+    /** ==== BRP 1155 === */
+    if (target === "prc1155" || target === "all") {
+        // ERC1155EthManager
+        let eRC1155HmyManager = await deployERC1155EthManager(multiSigWallet);
+    }
+    /** ==== BRP 1155 === */
     process.exit(0);
 
     // const amount = 100;

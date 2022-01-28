@@ -28,7 +28,7 @@ async function deployBUSD() {
   return busd;
 }
 
-async function deployBUSDEthManager(erc20Addr, wallet) {
+async function deployBUSDEthManager(erc20Addr) {
   const web3 = new Web3(process.env.ETH_NODE_URL);
   let ethMasterAccount = web3.eth.accounts.privateKeyToAccount(
     process.env.ETH_MASTER_PRIVATE_KEY
@@ -42,7 +42,7 @@ async function deployBUSDEthManager(erc20Addr, wallet) {
   const txContract = await managerContract
     .deploy({
       data: EthManagerJson.bytecode,
-      arguments: [erc20Addr, wallet],
+      arguments: [erc20Addr, ethMasterAccount],
     })
     .send({
       from: ethMasterAccount,
